@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stand Pluto Lua → Cherax Lua Translator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid #e94560;
+            margin-bottom: 30px;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #e94560, #ff6b9d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            color: #a0a0a0;
+            font-size: 1.1em;
+        }
+        
+        .editor-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 1200px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .editor-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .editor-header {
+            background: rgba(233, 69, 96, 0.2);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .editor-header h3 {
+            color: #e94560;
+            font-size: 1.2em;
+        }
+        
+        .editor-header .badge {
+            background: #e94560;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 500px;
+            background: #0a0a15;
+            border: none;
+            color: #e0e0e0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            padding: 20px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+        
+        textarea:focus {
+            outline: none;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #e94560 0%, #ff6b9d 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.4);
+        }
+        
+        button.secondary {
+            background: linear-gradient(135deg, #4a4a6a 0%, #6a6a8a 100%);
+        }
+        
+        button.secondary:hover {
+            box-shadow: 0 10px 30px rgba(100, 100, 130, 0.4);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat-card .number {
+            font-size: 2em;
+            color: #e94560;
+            font-weight: bold;
+        }
+        
+        .stat-card .label {
+            color: #a0a0a0;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .log-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .log-header {
+            background: rgba(100, 200, 100, 0.2);
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .log-header h3 {
+            color: #64c864;
+        }
+        
+        #translationLog {
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+        }
+        
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .log-entry.success {
+            color: #64c864;
+        }
+        
+        .log-entry.warning {
+            color: #ffaa00;
+        }
+        
+        .log-entry.info {
+            color: #64b4ff;
+        }
+        
+        .mapping-reference {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .mapping-reference h3 {
+            color: #e94560;
+            margin-bottom: 20px;
+        }
+        
+        .mapping-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 15px;
+        }
+        
+        .mapping-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+        }
+        
+        .mapping-item .stand {
+            color: #ff6b9d;
+        }
+        
+        .mapping-item .arrow {
+            color: #64c864;
+            margin: 0 10px;
+        }
+        
+        .mapping-item .cherax {
+            color: #64b4ff;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔄 Stand → Cherax Translator</h1>
+            <p>Convert Stand Pluto Lua scripts to Cherax Lua with Click GUI support</p>
+        </header>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="number" id="linesInput">0</div>
+                <div class="label">Input Lines</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="linesOutput">0</div>
+                <div class="label">Output Lines</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="replacements">0</div>
+                <div class="label">Replacements Made</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="warnings">0</div>
+                <div class="label">Warnings</div>
+            </div>
+        </div>
+        
+        <div class="editor-container">
+            <div class="editor-panel">
+                <div class="editor-header">
+                    <h3>📥 Stand Pluto Lua (Input)</h3>
+                    <span class="badge">Source</span>
+                </div>
+                <textarea id="inputCode" placeholder="Paste your Stand Pluto Lua script here..."></textarea>
+            </div>
+            
+            <div class="editor-panel">
+                <div class="editor-header">
+                    <h3>📤 Cherax Lua (Output)</h3>
+                    <span class="badge">Translated</span>
+                </div>
+                <textarea id="outputCode" readonly placeholder="Translated Cherax Lua code will appear here..."></textarea>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="translateCode()">🔄 Translate</button>
+            <button class="secondary" onclick="copyOutput()">📋 Copy Output</button>
+            <button class="secondary" onclick="clearAll()">🗑️ Clear All</button>
+            <button class="secondary" onclick="downloadOutput()">💾 Download</button>
+        </div>
+        
+        <div class="log-container">
+            <div class="log-header">
+                <h3>📝 Translation Log</h3>
+            </div>
+            <div id="translationLog">
+                <div class="log-entry info">Ready to translate. Paste your Stand script and click Translate.</div>
+            </div>
+        </div>
+        
+        <div class="mapping-reference">
+            <h3>📚 Quick Reference - Common Mappings</h3>
+            <div class="mapping-grid">
+                <div class="mapping-item">
+                    <span class="stand">menu.my_root()</span>
+                    <span class="arrow">→</span>
+                    <span class="cherax">ListGUI.GetRootTab():AddSubTab()</span>
+                </div>
+                <div class="mapping-item">
+                    <span class="stand">menu.action()</span>
+                    <span class="arrow">→</span>
+                    <span class="cherax">FeatureMgr.AddFeature(eFeatureType.Button)</span>
+                </div>
+                <div class="mapping-item">
+                    <span class="stand">menu.toggle()</span>
+                    <span class="arrow">→</span>
+                    <span class="cherax">FeatureMgr.AddFeature(eFeatureType.Toggle)</span>
+                </div>
+                <div class="mapping-item">
+                    <span class="stand">util.toast()</span>
+                    <span class="arrow">→</span>
+                    <span class="cherax">GUI.AddToast()</span>
+                </div>
+                <div class="mapping-item">
+                    <span class="stand">util.yield()</span>
+                    <span class="arrow">→</span>
+                    <span class="cherax">Script.Yield()</span>
+                </div>
+                <div class="mapping-item">
+                    <span class="stand">util.joaat()</span>
+                    <span class="arrow">→</span>
+                    <span class="cherax">Utils.Joaat()</span>
+                </div>
+                <div class="mapping-item">
+                    <span class="stand">players.user()</span>
+                    <span class="arrow">→</span>
+                    <span class="cherax">GTA.GetLocalPlayerId()</span>
+                </div>
+                <div class="mapping-item">
+                    <span class="stand">players.get_name()</span>
+                    <span class="arrow">→</span>
+                    <span class="cherax">Players.GetName()</span>
+                </div>
+                <div class="mapping-item">
+                    <span class="stand">entities.create_ped()</span>
+                    <span class="arrow">→</span>
+                    <span class="cherax">GTA.CreatePed()</span>
+                </div>
+                <div class="mapping-item">
+                    <span class="stand">entities.create_vehicle()</span>
+                    <span class="arrow">→</span>
+                    <span class="cherax">GTA.SpawnVehicle()</span>
+                </div>
+                <div class="mapping-item">
+                    <span class="stand">memory.read_int()</span>
+                    <span class="arrow">→</span>
+                    <span class="cherax">Memory.ReadInt()</span>
+                </div>
+                <div class="mapping-item">
+                    <span class="stand">util.trigger_script_event()</span>
+                    <span class="arrow">→</span>
+                    <span class="cherax">GTA.TriggerScriptEvent()</span>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Stand Pluto Lua to Cherax Lua Translator | Use responsibly</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Translation mappings
+        const mappings = [
+            // Utility functions
+            { pattern: /\butil\.toast\s*\(/g, replacement: 'GUI.AddToast("Script", ', log: 'util.toast → GUI.AddToast' },
+            { pattern: /\butil\.yield\s*\(/g, replacement: 'Script.Yield(', log: 'util.yield → Script.Yield' },
+            { pattern: /\butil\.joaat\s*\(/g, replacement: 'Utils.Joaat(', log: 'util.joaat → Utils.Joaat' },
+            { pattern: /\butil\.create_tick_handler\s*\(/g, replacement: 'Script.RegisterLooped(', log: 'util.create_tick_handler → Script.RegisterLooped' },
+            { pattern: /\butil\.create_thread\s*\(/g, replacement: 'Script.QueueJob(', log: 'util.create_thread → Script.QueueJob' },
+            { pattern: /\butil\.log\s*\(/g, replacement: 'Logger.LogInfo(', log: 'util.log → Logger.LogInfo' },
+            { pattern: /\butil\.current_time_millis\s*\(\)/g, replacement: 'Time.GetEpocheMs()', log: 'util.current_time_millis → Time.GetEpocheMs' },
+            { pattern: /\butil\.current_unix_time_seconds\s*\(\)/g, replacement: 'Time.GetEpoche()', log: 'util.current_unix_time_seconds → Time.GetEpoche' },
+            { pattern: /\butil\.trigger_script_event\s*\(/g, replacement: 'GTA.TriggerScriptEvent(', log: 'util.trigger_script_event → GTA.TriggerScriptEvent' },
+            { pattern: /\butil\.v3_look_at\s*\(/g, replacement: '-- TODO: Implement v3_look_at manually\n-- util.v3_look_at(', log: 'util.v3_look_at needs manual implementation', warning: true },
+            { pattern: /\butil\.spoof_script\s*\(/g, replacement: 'Script.ExecuteAsScript(', log: 'util.spoof_script → Script.ExecuteAsScript' },
+            { pattern: /\butil\.on_stop\s*\(/g, replacement: 'EventMgr.RegisterHandler(eLuaEvent.ON_UNLOAD, ', log: 'util.on_stop → EventMgr.RegisterHandler(ON_UNLOAD)' },
+            { pattern: /\butil\.get_ground_z\s*\(/g, replacement: '-- TODO: Use GET_GROUND_Z_FOR_3D_COORD native\n-- util.get_ground_z(', log: 'util.get_ground_z needs native implementation', warning: true },
+            
+            // Player functions
+            { pattern: /\bplayers\.user\s*\(\)/g, replacement: 'GTA.GetLocalPlayerId()', log: 'players.user → GTA.GetLocalPlayerId' },
+            { pattern: /\bplayers\.user_ped\s*\(\)/g, replacement: 'GTA.PointerToHandle(GTA.GetLocalPed())', log: 'players.user_ped → GTA.GetLocalPed' },
+            { pattern: /\bplayers\.get_name\s*\(/g, replacement: 'Players.GetName(', log: 'players.get_name → Players.GetName' },
+            { pattern: /\bplayers\.exists\s*\(/g, replacement: '(Players.GetById(', log: 'players.exists → Players.GetById check' },
+            { pattern: /\bplayers\.list\s*\(\)/g, replacement: 'Players.Get()', log: 'players.list → Players.Get' },
+            { pattern: /\bplayers\.on_join\s*\(/g, replacement: 'EventMgr.RegisterHandler(eLuaEvent.ON_PLAYER_JOIN, ', log: 'players.on_join → EventMgr.RegisterHandler' },
+            { pattern: /\bplayers\.on_leave\s*\(/g, replacement: 'EventMgr.RegisterHandler(eLuaEvent.ON_PLAYER_LEFT, ', log: 'players.on_leave → EventMgr.RegisterHandler' },
+            { pattern: /\bplayers\.is_godmode\s*\(/g, replacement: '-- TODO: Check via CPed:IsInvincible()\n-- players.is_godmode(', log: 'players.is_godmode needs CPed check', warning: true },
+            { pattern: /\bplayers\.is_in_interior\s*\(/g, replacement: '-- TODO: Use GET_INTERIOR_FROM_ENTITY native\n-- players.is_in_interior(', log: 'players.is_in_interior needs native', warning: true },
+            { pattern: /\bplayers\.get_rockstar_id\s*\(/g, replacement: '-- Players.GetById(pid):GetGamerInfo().RockstarId\n-- players.get_rockstar_id(', log: 'players.get_rockstar_id → GamerInfo.RockstarId' },
+            { pattern: /\bplayers\.get_ip_string\s*\(/g, replacement: 'Players.GetIPString(', log: 'players.get_ip_string → Players.GetIPString' },
+            { pattern: /\bplayers\.get_position\s*\(/g, replacement: '-- TODO: Players.GetCPed(pid).Position\n-- players.get_position(', log: 'players.get_position → CPed.Position' },
+            
+            // Entity functions
+            { pattern: /\bentities\.get_all_peds_as_pointers\s*\(\)/g, replacement: 'PoolMgr.GetRenderedPeds()', log: 'entities.get_all_peds_as_pointers → PoolMgr.GetRenderedPeds' },
+            { pattern: /\bentities\.get_all_vehicles_as_pointers\s*\(\)/g, replacement: 'PoolMgr.GetRenderedVehicles()', log: 'entities.get_all_vehicles_as_pointers → PoolMgr.GetRenderedVehicles' },
+            { pattern: /\bentities\.get_all_objects_as_pointers\s*\(\)/g, replacement: 'PoolMgr.GetRenderedObjects()', log: 'entities.get_all_objects_as_pointers → PoolMgr.GetRenderedObjects' },
+            { pattern: /\bentities\.get_all_peds_as_handles\s*\(\)/g, replacement: '-- TODO: Loop PoolMgr.GetPed(i)\n-- entities.get_all_peds_as_handles()', log: 'entities.get_all_peds_as_handles needs loop', warning: true },
+            { pattern: /\bentities\.get_all_vehicles_as_handles\s*\(\)/g, replacement: '-- TODO: Loop PoolMgr.GetVehicle(i)\n-- entities.get_all_vehicles_as_handles()', log: 'entities.get_all_vehicles_as_handles needs loop', warning: true },
+            { pattern: /\bentities\.get_all_objects_as_handles\s*\(\)/g, replacement: '-- TODO: Loop PoolMgr.GetObject(i)\n-- entities.get_all_objects_as_handles()', log: 'entities.get_all_objects_as_handles needs loop', warning: true },
+            { pattern: /\bentities\.get_all_pickups_as_handles\s*\(\)/g, replacement: '-- TODO: Loop PoolMgr.GetPickup(i)\n-- entities.get_all_pickups_as_handles()', log: 'entities.get_all_pickups_as_handles needs loop', warning: true },
+            { pattern: /\bentities\.create_ped\s*\(/g, replacement: 'GTA.CreatePed(', log: 'entities.create_ped → GTA.CreatePed' },
+            { pattern: /\bentities\.create_vehicle\s*\(/g, replacement: 'GTA.SpawnVehicle(', log: 'entities.create_vehicle → GTA.SpawnVehicle' },
+            { pattern: /\bentities\.create_object\s*\(/g, replacement: 'GTA.CreateObject(', log: 'entities.create_object → GTA.CreateObject' },
+            { pattern: /\bentities\.delete_by_handle\s*\(/g, replacement: '-- TODO: Use DELETE_ENTITY native\n-- entities.delete_by_handle(', log: 'entities.delete_by_handle needs native', warning: true },
+            { pattern: /\bentities\.handle_to_pointer\s*\(/g, replacement: 'GTA.HandleToPointer(', log: 'entities.handle_to_pointer → GTA.HandleToPointer' },
+            { pattern: /\bentities\.pointer_to_handle\s*\(/g, replacement: 'GTA.PointerToHandle(', log: 'entities.pointer_to_handle → GTA.PointerToHandle' },
+            { pattern: /\bentities\.get_position\s*\(/g, replacement: '-- CEntity.Position property\n-- entities.get_position(', log: 'entities.get_position → CEntity.Position' },
+            { pattern: /\bentities\.get_model_hash\s*\(/g, replacement: '-- CEntity.ModelInfo.Model property\n-- entities.get_model_hash(', log: 'entities.get_model_hash → ModelInfo.Model' },
+            { pattern: /\bentities\.request_control\s*\(/g, replacement: '-- TODO: Implement control request loop\n-- entities.request_control(', log: 'entities.request_control needs implementation', warning: true },
+            
+            // Memory functions
+            { pattern: /\bmemory\.alloc\s*\(\)/g, replacement: 'Memory.Alloc()', log: 'memory.alloc → Memory.Alloc' },
+            { pattern: /\bmemory\.alloc\s*\((\d+)\)/g, replacement: 'Memory.Alloc($1)', log: 'memory.alloc → Memory.Alloc' },
+            { pattern: /\bmemory\.alloc_int\s*\(\)/g, replacement: 'Memory.AllocInt()', log: 'memory.alloc_int → Memory.AllocInt' },
+            { pattern: /\bmemory\.free\s*\(/g, replacement: 'Memory.Free(', log: 'memory.free → Memory.Free' },
+            { pattern: /\bmemory\.read_byte\s*\(/g, replacement: 'Memory.ReadByte(', log: 'memory.read_byte → Memory.ReadByte' },
+            { pattern: /\bmemory\.read_ubyte\s*\(/g, replacement: 'Memory.ReadUByte(', log: 'memory.read_ubyte → Memory.ReadUByte' },
+            { pattern: /\bmemory\.read_short\s*\(/g, replacement: 'Memory.ReadShort(', log: 'memory.read_short → Memory.ReadShort' },
+            { pattern: /\bmemory\.read_int\s*\(/g, replacement: 'Memory.ReadInt(', log: 'memory.read_int → Memory.ReadInt' },
+            { pattern: /\bmemory\.read_long\s*\(/g, replacement: 'Memory.ReadLong(', log: 'memory.read_long → Memory.ReadLong' },
+            { pattern: /\bmemory\.read_float\s*\(/g, replacement: 'Memory.ReadFloat(', log: 'memory.read_float → Memory.ReadFloat' },
+            { pattern: /\bmemory\.read_string\s*\(/g, replacement: 'Memory.ReadString(', log: 'memory.read_string → Memory.ReadString' },
+            { pattern: /\bmemory\.read_vector3\s*\(/g, replacement: 'Memory.ReadV3(', log: 'memory.read_vector3 → Memory.ReadV3' },
+            { pattern: /\bmemory\.write_byte\s*\(/g, replacement: 'Memory.WriteByte(', log: 'memory.write_byte → Memory.WriteByte' },
+            { pattern: /\bmemory\.write_int\s*\(/g, replacement: 'Memory.WriteInt(', log: 'memory.write_int → Memory.WriteInt' },
+            { pattern: /\bmemory\.write_long\s*\(/g, replacement: 'Memory.WriteLong(', log: 'memory.write_long → Memory.WriteLong' },
+            { pattern: /\bmemory\.write_float\s*\(/g, replacement: 'Memory.WriteFloat(', log: 'memory.write_float → Memory.WriteFloat' },
+            { pattern: /\bmemory\.write_string\s*\(/g, replacement: 'Memory.WriteString(', log: 'memory.write_string → Memory.WriteString' },
+            { pattern: /\bmemory\.write_vector3\s*\(/g, replacement: 'Memory.WriteV3(', log: 'memory.write_vector3 → Memory.WriteV3' },
+            { pattern: /\bmemory\.scan\s*\(/g, replacement: 'Memory.Scan(', log: 'memory.scan → Memory.Scan' },
+            { pattern: /\bmemory\.rip\s*\(/g, replacement: 'Memory.Rip(', log: 'memory.rip → Memory.Rip' },
+            { pattern: /\bmemory\.script_global\s*\(/g, replacement: 'ScriptGlobal.GetPtr(', log: 'memory.script_global → ScriptGlobal.GetPtr' },
+            { pattern: /\bmemory\.script_local\s*\(/g, replacement: 'ScriptLocal.GetPtr(', log: 'memory.script_local → ScriptLocal.GetPtr' },
+            { pattern: /\bmemory\.tunable\s*\(/g, replacement: 'ScriptGlobal.GetTunableByHash(', log: 'memory.tunable → ScriptGlobal.GetTunableByHash' },
+            
+            // Chat functions
+            { pattern: /\bchat\.on_message\s*\(/g, replacement: 'EventMgr.RegisterHandler(eLuaEvent.ON_CHAT_MESSAGE, ', log: 'chat.on_message → EventMgr.RegisterHandler' },
+            { pattern: /\bchat\.send_message\s*\(/g, replacement: 'GTA.SendChatMessageToEveryone(', log: 'chat.send_message → GTA.SendChatMessageToEveryone' },
+            { pattern: /\bchat\.send_targeted_message\s*\(/g, replacement: 'GTA.SendChatMessageToPlayer(', log: 'chat.send_targeted_message → GTA.SendChatMessageToPlayer' },
+            
+            // Menu functions (complex - need special handling)
+            { pattern: /\bmenu\.my_root\s*\(\)/g, replacement: '-- TODO: Use ListGUI.GetRootTab():AddSubTab("Name", "Desc")\n-- menu.my_root()', log: 'menu.my_root → ListGUI.GetRootTab', warning: true },
+            { pattern: /\bmenu\.action\s*\(/g, replacement: '-- TODO: FeatureMgr.AddFeature(hash, name, eFeatureType.Button, desc, callback)\n-- menu.action(', log: 'menu.action → FeatureMgr.AddFeature(Button)', warning: true },
+            { pattern: /\bmenu\.toggle\s*\(/g, replacement: '-- TODO: FeatureMgr.AddFeature(hash, name, eFeatureType.Toggle, desc, callback)\n-- menu.toggle(', log: 'menu.toggle → FeatureMgr.AddFeature(Toggle)', warning: true },
+            { pattern: /\bmenu\.toggle_loop\s*\(/g, replacement: '-- TODO: FeatureMgr.AddFeature + Script.RegisterLooped\n-- menu.toggle_loop(', log: 'menu.toggle_loop needs combined approach', warning: true },
+            { pattern: /\bmenu\.slider\s*\(/g, replacement: '-- TODO: FeatureMgr.AddFeature(hash, name, eFeatureType.SliderInt, desc, callback)\n-- menu.slider(', log: 'menu.slider → FeatureMgr.AddFeature(SliderInt)', warning: true },
+            { pattern: /\bmenu\.slider_float\s*\(/g, replacement: '-- TODO: FeatureMgr.AddFeature(hash, name, eFeatureType.SliderFloat, desc, callback)\n-- menu.slider_float(', log: 'menu.slider_float → FeatureMgr.AddFeature(SliderFloat)', warning: true },
+            { pattern: /\bmenu\.list\s*\(/g, replacement: '-- TODO: Tab:AddSubTab(name, desc)\n-- menu.list(', log: 'menu.list → Tab:AddSubTab', warning: true },
+            { pattern: /\bmenu\.list_select\s*\(/g, replacement: '-- TODO: FeatureMgr.AddFeature(hash, name, eFeatureType.Combo)\n-- menu.list_select(', log: 'menu.list_select → FeatureMgr.AddFeature(Combo)', warning: true },
+            { pattern: /\bmenu\.text_input\s*\(/g, replacement: '-- TODO: FeatureMgr.AddFeature(hash, name, eFeatureType.InputText)\n-- menu.text_input(', log: 'menu.text_input → FeatureMgr.AddFeature(InputText)', warning: true },
+            { pattern: /\bmenu\.colour\s*\(/g, replacement: '-- TODO: FeatureMgr.AddFeature(hash, name, eFeatureType.InputColor4)\n-- menu.colour(', log: 'menu.colour → FeatureMgr.AddFeature(InputColor4)', warning: true },
+            { pattern: /\bmenu\.divider\s*\(/g, replacement: '-- TODO: Tab:AddSeparator(text)\n-- menu.divider(', log: 'menu.divider → Tab:AddSeparator', warning: true },
+            { pattern: /\bmenu\.trigger_commands?\s*\(/g, replacement: '-- TODO: Feature:OnClick() or Feature:TriggerCallback()\n-- menu.trigger_command(', log: 'menu.trigger_command → Feature:OnClick', warning: true },
+            { pattern: /\bmenu\.focus\s*\(/g, replacement: '-- TODO: ListGUI.SetCurrentTab(tab)\n-- menu.focus(', log: 'menu.focus → ListGUI.SetCurrentTab', warning: true },
+            { pattern: /\bmenu\.delete\s*\(/g, replacement: 'FeatureMgr.RemoveFeature(', log: 'menu.delete → FeatureMgr.RemoveFeature' },
+            { pattern: /\bmenu\.ref_by_path\s*\(/g, replacement: '-- TODO: Use FeatureMgr.GetFeatureByName or hash\n-- menu.ref_by_path(', log: 'menu.ref_by_path needs alternative', warning: true },
+            
+            // Filesystem functions
+            { pattern: /\bfilesystem\.scripts_dir\s*\(\)/g, replacement: 'FileMgr.GetMenuRootPath() .. "\\\\Scripts\\\\"', log: 'filesystem.scripts_dir → FileMgr.GetMenuRootPath' },
+            { pattern: /\bfilesystem\.resources_dir\s*\(\)/g, replacement: 'FileMgr.GetMenuRootPath() .. "\\\\Resources\\\\"', log: 'filesystem.resources_dir → FileMgr.GetMenuRootPath' },
+            { pattern: /\bfilesystem\.exists\s*\(/g, replacement: 'FileMgr.DoesFileExist(', log: 'filesystem.exists → FileMgr.DoesFileExist' },
+            { pattern: /\bfilesystem\.mkdir\s*\(/g, replacement: 'FileMgr.CreateDir(', log: 'filesystem.mkdir → FileMgr.CreateDir' },
+            { pattern: /\bfilesystem\.list_files\s*\(/g, replacement: 'FileMgr.FindFiles(', log: 'filesystem.list_files → FileMgr.FindFiles' },
+            
+            // DirectX functions
+            { pattern: /\bdirectx\.create_texture\s*\(/g, replacement: 'Texture.LoadTexture(', log: 'directx.create_texture → Texture.LoadTexture' },
+            { pattern: /\bdirectx\.draw_texture\s*\(/g, replacement: '-- TODO: Use ImGui.AddImage in ON_PRESENT handler\n-- directx.draw_texture(', log: 'directx.draw_texture → ImGui.AddImage', warning: true },
+            { pattern: /\bdirectx\.draw_text\s*\(/g, replacement: 'ImGui.AddText(', log: 'directx.draw_text → ImGui.AddText' },
+            { pattern: /\bdirectx\.draw_rect\s*\(/g, replacement: 'ImGui.AddRectFilled(', log: 'directx.draw_rect → ImGui.AddRectFilled' },
+            { pattern: /\bdirectx\.draw_line\s*\(/g, replacement: 'ImGui.AddLine(', log: 'directx.draw_line → ImGui.AddLine' },
+            
+            // v3 vector functions
+            { pattern: /\bv3\.new\s*\(/g, replacement: 'V3.New(', log: 'v3.new → V3.New' },
+            { pattern: /\bv3\.getX\s*\(/g, replacement: '-- .x property\n-- v3.getX(', log: 'v3.getX → .x property' },
+            { pattern: /\bv3\.getY\s*\(/g, replacement: '-- .y property\n-- v3.getY(', log: 'v3.getY → .y property' },
+            { pattern: /\bv3\.getZ\s*\(/g, replacement: '-- .z property\n-- v3.getZ(', log: 'v3.getZ → .z property' },
+            { pattern: /\bv3\.free\s*\(/g, replacement: '-- Not needed in Cherax\n-- v3.free(', log: 'v3.free → Not needed' },
+            
+            // Global variables
+            { pattern: /\bSCRIPT_NAME\b/g, replacement: '-- TODO: Define script name variable', log: 'SCRIPT_NAME needs definition' },
+            { pattern: /\bPLAYER\.PLAYER_PED_ID\s*\(\)/g, replacement: 'GTA.PointerToHandle(GTA.GetLocalPed())', log: 'PLAYER.PLAYER_PED_ID → GTA.GetLocalPed' },
+            { pattern: /\bPLAYER\.GET_PLAYER_PED\s*\(/g, replacement: 'Natives.InvokeInt(0x43A66C31C68491C0, ', log: 'PLAYER.GET_PLAYER_PED → Native invoke' },
+        ];
+        
+        let replacementCount = 0;
+        let warningCount = 0;
+        
+        function translateCode() {
+            const input = document.getElementById('inputCode').value;
+            if (!input.trim()) {
+                alert('Please paste some Stand Lua code first!');
+                return;
+            }
+            
+            let output = input;
+            const logDiv = document.getElementById('translationLog');
+            logDiv.innerHTML = '';
+            replacementCount = 0;
+            warningCount = 0;
+            
+            // Add header comment
+            const header = `--[[
+    Translated from Stand Pluto Lua to Cherax Lua
+    Generated by Stand → Cherax Translator
+    
+    NOTE: Some functions may need manual adjustment.
+    Look for TODO comments for areas that need attention.
+]]
+
+`;
+            
+            // Apply all mappings
+            mappings.forEach(mapping => {
+                const matches = output.match(mapping.pattern);
+                if (matches) {
+                    output = output.replace(mapping.pattern, mapping.replacement);
+                    const count = matches.length;
+                    replacementCount += count;
+                    
+                    if (mapping.warning) {
+                        warningCount += count;
+                        addLogEntry(`⚠️ ${mapping.log} (${count}x) - Manual review needed`, 'warning');
+                    } else {
+                        addLogEntry(`✓ ${mapping.log} (${count}x)`, 'success');
+                    }
+                }
+            });
+            
+            // Add Cherax boilerplate if menu functions were detected
+            if (input.includes('menu.my_root') || input.includes('menu.action') || input.includes('menu.toggle')) {
+                const boilerplate = `
+-- Cherax Menu Setup
+local SCRIPT_NAME = "Translated Script"
+local mainTab = ListGUI.GetRootTab():AddSubTab(SCRIPT_NAME, "Translated Stand Script")
+
+-- Helper function for generating unique hashes
+local function GenerateHash(name)
+    return Utils.Joaat(SCRIPT_NAME .. "_" .. name)
+end
+
+-- Helper function for toast notifications
+local function Toast(message, duration)
+    duration = duration or 3000
+    GUI.AddToast(SCRIPT_NAME, message, duration, eToastPos.TOP_RIGHT)
+end
+
+`;
+                output = header + boilerplate + output;
+                addLogEntry('ℹ️ Added Cherax boilerplate code', 'info');
+            } else {
+                output = header + output;
+            }
+            
+            document.getElementById('outputCode').value = output;
+            
+            // Update stats
+            document.getElementById('linesInput').textContent = input.split('\n').length;
+            document.getElementById('linesOutput').textContent = output.split('\n').length;
+            document.getElementById('replacements').textContent = replacementCount;
+            document.getElementById('warnings').textContent = warningCount;
+            
+            addLogEntry(`\n📊 Translation complete: ${replacementCount} replacements, ${warningCount} warnings`, 'info');
+        }
+        
+        function addLogEntry(message, type) {
+            const logDiv = document.getElementById('translationLog');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry ' + type;
+            entry.textContent = message;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function copyOutput() {
+            const output = document.getElementById('outputCode');
+            output.select();
+            document.execCommand('copy');
+            alert('Output copied to clipboard!');
+        }
+        
+        function clearAll() {
+            document.getElementById('inputCode').value = '';
+            document.getElementById('outputCode').value = '';
+            document.getElementById('translationLog').innerHTML = '<div class="log-entry info">Ready to translate. Paste your Stand script and click Translate.</div>';
+            document.getElementById('linesInput').textContent = '0';
+            document.getElementById('linesOutput').textContent = '0';
+            document.getElementById('replacements').textContent = '0';
+            document.getElementById('warnings').textContent = '0';
+        }
+        
+        function downloadOutput() {
+            const output = document.getElementById('outputCode').value;
+            if (!output.trim()) {
+                alert('No translated code to download!');
+                return;
+            }
+            
+            const blob = new Blob([output], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'translated_cherax_script.lua';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Update line count on input
+        document.getElementById('inputCode').addEventListener('input', function() {
+            document.getElementById('linesInput').textContent = this.value.split('\n').length;
+        });
+    </script>
+</body>
+</html>
