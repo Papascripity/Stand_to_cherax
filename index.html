@@ -3,23 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stand Pluto Lua → Cherax Lua Converter Pro</title>
+    <title>Lock In Tracker</title>
     <style>
-        :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-tertiary: #1a1a25;
-            --accent: #6366f1;
-            --accent-hover: #818cf8;
-            --accent-glow: rgba(99, 102, 241, 0.3);
-            --success: #22c55e;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --border: #2d2d3a;
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -27,2450 +12,657 @@
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #eee;
+            padding: 20px;
             min-height: 100vh;
-            line-height: 1.6;
         }
 
         .container {
-            max-width: 1800px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
         }
 
-        header {
+        .header {
             text-align: center;
-            padding: 30px 0;
-            border-bottom: 1px solid var(--border);
             margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 2px solid #e94560;
         }
 
-        h1 {
-            font-size: 2.5rem;
-            background: linear-gradient(135deg, var(--accent), #a855f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .header h1 {
+            font-size: 2.5em;
+            color: #e94560;
+            text-transform: uppercase;
+            letter-spacing: 3px;
             margin-bottom: 10px;
         }
 
-        .subtitle {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
+        .header .subtitle {
+            color: #aaa;
+            font-size: 1.1em;
         }
 
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .panel {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-        }
-
-        .panel-header {
-            background: var(--bg-tertiary);
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border);
+        .week-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
         }
 
-        .panel-title {
-            font-weight: 600;
-            font-size: 1.1rem;
+        .week-nav h2 {
+            color: #fff;
+            font-size: 1.5em;
+        }
+
+        .week-nav button {
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .week-nav button:hover {
+            background: #ff6b81;
+            transform: translateY(-2px);
+        }
+
+        .score-board {
+            text-align: center;
+            padding: 20px;
+            background: rgba(233, 69, 96, 0.1);
+            border: 2px solid #e94560;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .score-board .score {
+            font-size: 3em;
+            color: #e94560;
+            font-weight: bold;
+        }
+
+        .score-board .message {
+            font-size: 1.2em;
+            margin-top: 10px;
+            color: #fff;
+        }
+
+        .days-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .day-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .day-card:hover {
+            border-color: #e94560;
+            transform: translateY(-5px);
+        }
+
+        .day-card.rest-day {
+            background: rgba(100, 255, 100, 0.05);
+            border-color: rgba(100, 255, 100, 0.3);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .day-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #e94560;
+            text-transform: uppercase;
+        }
+
+        .day-score {
+            font-size: 1.2em;
+            color: #fff;
+            background: rgba(233, 69, 96, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        .tasks-list {
+            list-style: none;
+        }
+
+        .task-item {
             display: flex;
             align-items: center;
+            gap: 15px;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .task-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .task-item.completed {
+            background: rgba(100, 255, 100, 0.1);
+        }
+
+        .task-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #e94560;
+        }
+
+        .task-label {
+            flex: 1;
+            font-size: 1.1em;
+            cursor: pointer;
+            color: #ddd;
+        }
+
+        .task-item.completed .task-label {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .task-edit {
+            background: none;
+            border: none;
+            color: #e94560;
+            cursor: pointer;
+            font-size: 1em;
+            padding: 5px 10px;
+        }
+
+        .task-edit:hover {
+            color: #ff6b81;
+        }
+
+        .add-task-btn {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background: rgba(233, 69, 96, 0.2);
+            border: 2px dashed #e94560;
+            color: #e94560;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .add-task-btn:hover {
+            background: rgba(233, 69, 96, 0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #e94560;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-content h3 {
+            color: #e94560;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            color: white;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+
+        .modal-buttons {
+            display: flex;
             gap: 10px;
         }
 
-        .panel-title::before {
-            content: '';
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--accent);
-        }
-
-        .editor-container {
-            position: relative;
-            height: 500px;
-        }
-
-        textarea {
-            width: 100%;
-            height: 100%;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
             border: none;
-            padding: 15px;
-            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
-            font-size: 13px;
-            resize: none;
-            outline: none;
-            line-height: 1.6;
-            tab-size: 4;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
         }
 
-        textarea::placeholder {
-            color: var(--text-secondary);
+        .btn-save {
+            background: #e94560;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #ff6b81;
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-delete {
+            background: #ff4444;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #ff6666;
         }
 
         .controls {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
+            margin-top: 30px;
         }
 
-        .btn {
-            padding: 12px 28px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent), #7c3aed);
+        .controls button {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             color: white;
-            box-shadow: 0 4px 15px var(--accent-glow);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px var(--accent-glow);
-        }
-
-        .btn-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background: var(--border);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .options-panel {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .options-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-        }
-
-        .option-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .option-group label {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
+            border-radius: 5px;
             cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
         }
 
-        input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--accent);
-            cursor: pointer;
+        .controls button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #e94560;
         }
 
-        .stats-panel {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 15px;
-            background: var(--bg-tertiary);
-            border-radius: 8px;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--accent);
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            margin-top: 5px;
-        }
-
-        .log-panel {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            max-height: 300px;
-            overflow: hidden;
-        }
-
-        .log-content {
-            height: 250px;
-            overflow-y: auto;
-            padding: 15px;
-            font-family: 'Cascadia Code', monospace;
-            font-size: 12px;
-        }
-
-        .log-entry {
-            padding: 4px 0;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            gap: 10px;
-        }
-
-        .log-entry:last-child {
-            border-bottom: none;
-        }
-
-        .log-type {
-            font-weight: 600;
-            min-width: 70px;
-        }
-
-        .log-type.info { color: var(--accent); }
-        .log-type.success { color: var(--success); }
-        .log-type.warning { color: var(--warning); }
-        .log-type.error { color: var(--error); }
-
-        .log-message {
-            color: var(--text-secondary);
-        }
-
-        .mapping-reference {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            margin-top: 20px;
-        }
-
-        .mapping-content {
-            max-height: 400px;
-            overflow-y: auto;
-            padding: 15px;
-        }
-
-        .mapping-category {
-            margin-bottom: 20px;
-        }
-
-        .mapping-category h3 {
-            color: var(--accent);
-            margin-bottom: 10px;
-            font-size: 1rem;
-        }
-
-        .mapping-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-        }
-
-        .mapping-table th,
-        .mapping-table td {
-            padding: 8px 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .mapping-table th {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .mapping-table td {
-            font-family: 'Cascadia Code', monospace;
-            color: var(--text-secondary);
-        }
-
-        .mapping-table tr:hover td {
-            background: var(--bg-tertiary);
-        }
-
-        .tabs {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-        }
-
-        .tab {
-            padding: 10px 20px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 8px 8px 0 0;
-            cursor: pointer;
-            color: var(--text-secondary);
-            transition: all 0.2s;
-        }
-
-        .tab.active {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-        }
-
-        .tab:hover:not(.active) {
-            background: var(--border);
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        @media (max-width: 1200px) {
-            .main-grid {
-                grid-template-columns: 1fr;
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
             }
             
-            .editor-container {
-                height: 400px;
+            .score-board .score {
+                font-size: 2em;
             }
         }
-
-        .line-numbers {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 50px;
-            height: 100%;
-            background: var(--bg-tertiary);
-            padding: 15px 10px;
-            text-align: right;
-            font-family: 'Cascadia Code', monospace;
-            font-size: 13px;
-            color: var(--text-secondary);
-            user-select: none;
-            overflow: hidden;
-            line-height: 1.6;
-            border-right: 1px solid var(--border);
-        }
-
-        textarea.with-line-numbers {
-            padding-left: 60px;
-        }
-
-        .badge {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .badge-success { background: rgba(34, 197, 94, 0.2); color: var(--success); }
-        .badge-warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
-        .badge-error { background: rgba(239, 68, 68, 0.2); color: var(--error); }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>🔄 Stand Pluto → Cherax Converter Pro</h1>
-            <p class="subtitle">Advanced Lua Transpiler with Full API Mapping, Pluto Syntax Conversion & Native Updates</p>
-        </header>
-
-        <div class="options-panel">
-            <div class="options-grid">
-                <div class="option-group">
-                    <input type="checkbox" id="opt-imgui" checked>
-                    <label for="opt-imgui">Generate ImGui ClickGUI Framework</label>
-                </div>
-                <div class="option-group">
-                    <input type="checkbox" id="opt-helpers" checked>
-                    <label for="opt-helpers">Include Helper Functions</label>
-                </div>
-                <div class="option-group">
-                    <input type="checkbox" id="opt-natives" checked>
-                    <label for="opt-natives">Update Native Hashes</label>
-                </div>
-                <div class="option-group">
-                    <input type="checkbox" id="opt-comments" checked>
-                    <label for="opt-comments">Add Conversion Comments</label>
-                </div>
-                <div class="option-group">
-                    <input type="checkbox" id="opt-pluto" checked>
-                    <label for="opt-pluto">Convert Pluto Syntax to Standard Lua</label>
-                </div>
-                <div class="option-group">
-                    <input type="checkbox" id="opt-optimize" checked>
-                    <label for="opt-optimize">Optimize Output Code</label>
-                </div>
-            </div>
+        <div class="header">
+            <h1>⚡ LOCK IN OR WASTE IT ⚡</h1>
+            <p class="subtitle">"I'm a living thing. I'll die eventually, I'll never be born again."</p>
         </div>
+
+        <div class="week-nav">
+            <button onclick="previousWeek()">← Previous Week</button>
+            <h2 id="weekTitle">WEEK 1</h2>
+            <button onclick="nextWeek()">Next Week →</button>
+        </div>
+
+        <div class="score-board">
+            <div class="score" id="totalScore">0/0</div>
+            <div class="message" id="scoreMessage">Let's lock in.</div>
+        </div>
+
+        <div class="days-grid" id="daysGrid"></div>
 
         <div class="controls">
-            <button class="btn btn-primary" onclick="convertCode()">
-                <span>⚡</span> Convert Script
-            </button>
-            <button class="btn btn-secondary" onclick="clearAll()">
-                <span>🗑️</span> Clear All
-            </button>
-            <button class="btn btn-secondary" onclick="loadSample()">
-                <span>📄</span> Load Sample
-            </button>
-            <button class="btn btn-success" onclick="downloadOutput()">
-                <span>💾</span> Download .lua
-            </button>
-            <button class="btn btn-secondary" onclick="copyOutput()">
-                <span>📋</span> Copy Output
-            </button>
+            <button onclick="resetWeek()">Reset Week</button>
+            <button onclick="resetAll()">Reset Everything</button>
         </div>
+    </div>
 
-        <div class="stats-panel">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-value" id="stat-lines">0</div>
-                    <div class="stat-label">Lines Processed</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="stat-conversions">0</div>
-                    <div class="stat-label">API Conversions</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="stat-pluto">0</div>
-                    <div class="stat-label">Pluto Fixes</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="stat-natives">0</div>
-                    <div class="stat-label">Native Updates</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="stat-warnings">0</div>
-                    <div class="stat-label">Warnings</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="stat-errors">0</div>
-                    <div class="stat-label">Errors</div>
-                </div>
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Edit Task</h3>
+            <input type="text" id="taskInput" placeholder="Enter task name...">
+            <div class="modal-buttons">
+                <button class="btn-save" onclick="saveTask()">Save</button>
+                <button class="btn-delete" onclick="deleteTask()" id="deleteBtn">Delete</button>
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
             </div>
-        </div>
-
-        <div class="main-grid">
-            <div class="panel">
-                <div class="panel-header">
-                    <span class="panel-title">Stand Pluto Lua Input</span>
-                    <span class="badge badge-warning">Pluto + Stand API</span>
-                </div>
-                <div class="editor-container">
-                    <textarea id="input" placeholder="-- Paste your Stand Pluto Lua script here...
--- Supports:
---   • All Stand API functions (menu, players, entities, etc.)
---   • Pluto Lua syntax (compound assignment, continue, etc.)
---   • GTA V Natives
---   • Memory operations
---   • DirectX drawing
---   • And much more!
-
-util.require_natives('3095a')
-
-local myRoot = menu.my_root()
-
-myRoot:toggle_loop('Example Toggle', {}, 'Description', function()
-    -- Your code here
-    util.yield()
-end)"></textarea>
-                </div>
-            </div>
-
-            <div class="panel">
-                <div class="panel-header">
-                    <span class="panel-title">Cherax Lua Output</span>
-                    <span class="badge badge-success">Standard Lua + Cherax API</span>
-                </div>
-                <div class="editor-container">
-                    <textarea id="output" readonly placeholder="-- Converted Cherax Lua code will appear here..."></textarea>
-                </div>
-            </div>
-        </div>
-
-        <div class="log-panel">
-            <div class="panel-header">
-                <span class="panel-title">Conversion Log</span>
-                <button class="btn btn-secondary" onclick="clearLog()" style="padding: 5px 15px; font-size: 0.8rem;">Clear</button>
-            </div>
-            <div class="log-content" id="log"></div>
-        </div>
-
-        <div class="mapping-reference">
-            <div class="panel-header">
-                <span class="panel-title">API Mapping Reference</span>
-            </div>
-            <div class="tabs">
-                <div class="tab active" onclick="showTab('menu', this)">Menu</div>
-                <div class="tab" onclick="showTab('players', this)">Players</div>
-                <div class="tab" onclick="showTab('entities', this)">Entities</div>
-                <div class="tab" onclick="showTab('util', this)">Util</div>
-                <div class="tab" onclick="showTab('memory', this)">Memory</div>
-                <div class="tab" onclick="showTab('pluto', this)">Pluto Syntax</div>
-            </div>
-            <div class="mapping-content" id="mapping-content"></div>
         </div>
     </div>
 
     <script>
-// =============================================================================
-// STAND TO CHERAX CONVERTER PRO - COMPLETE IMPLEMENTATION
-// =============================================================================
+        const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+        const DEFAULT_TASKS = {
+            'MON': ['School', 'Fitness', 'C++', 'Piano'],
+            'TUE': ['School', 'Fitness', 'C++', 'Piano'],
+            'WED': ['School', 'Fitness', 'C++', 'Piano'],
+            'THU': ['School', 'Fitness', 'C++', 'Piano'],
+            'FRI': ['School', 'Fitness', 'C++', 'Piano'],
+            'SAT': ['School', 'Fitness', 'C++', 'Piano'],
+            'SUN': []
+        };
 
-const CONVERTER = {
-    stats: {
-        lines: 0,
-        conversions: 0,
-        plutoFixes: 0,
-        nativeUpdates: 0,
-        warnings: 0,
-        errors: 0
-    },
-    logs: [],
-    menuVars: new Map(),
-    menuCounter: 0,
-    featureCounter: 0
-};
+        let currentWeek = 1;
+        let weekData = {};
+        let editingTask = null;
 
-// =============================================================================
-// PLUTO LUA SYNTAX CONVERSIONS
-// =============================================================================
-
-const PLUTO_CONVERSIONS = [
-    // Compound assignment operators
-    { pattern: /(\w+)\s*\+=\s*(.+)/g, replace: '$1 = $1 + ($2)', name: '+= operator' },
-    { pattern: /(\w+)\s*-=\s*(.+)/g, replace: '$1 = $1 - ($2)', name: '-= operator' },
-    { pattern: /(\w+)\s*\*=\s*(.+)/g, replace: '$1 = $1 * ($2)', name: '*= operator' },
-    { pattern: /(\w+)\s*\/=\s*(.+)/g, replace: '$1 = $1 / ($2)', name: '/= operator' },
-    { pattern: /(\w+)\s*%=\s*(.+)/g, replace: '$1 = $1 % ($2)', name: '%= operator' },
-    { pattern: /(\w+)\s*\^=\s*(.+)/g, replace: '$1 = $1 ^ ($2)', name: '^= operator' },
-    { pattern: /(\w+)\s*\.\.=\s*(.+)/g, replace: '$1 = $1 .. ($2)', name: '..= operator' },
-    { pattern: /(\w+)\s*\|=\s*(.+)/g, replace: '$1 = bit.bor($1, $2)', name: '|= operator' },
-    { pattern: /(\w+)\s*&=\s*(.+)/g, replace: '$1 = bit.band($1, $2)', name: '&= operator' },
-    { pattern: /(\w+)\s*<<=\s*(.+)/g, replace: '$1 = bit.lshift($1, $2)', name: '<<= operator' },
-    { pattern: /(\w+)\s*>>=\s*(.+)/g, replace: '$1 = bit.rshift($1, $2)', name: '>>= operator' },
-    
-    // Null coalescing and safe navigation
-    { pattern: /(\w+)\s*\?\?=\s*(.+)/g, replace: 'if $1 == nil then $1 = $2 end', name: '??= operator' },
-    { pattern: /(\w+)\s*\?\?\s*(.+)/g, replace: '($1 ~= nil and $1 or $2)', name: '?? operator' },
-    { pattern: /(\w+)\?\.(\w+)/g, replace: '($1 and $1.$2)', name: '?. safe navigation' },
-    { pattern: /(\w+)\?\[([^\]]+)\]/g, replace: '($1 and $1[$2])', name: '?[] safe index' },
-    
-    // Ternary operator
-    { pattern: /([^?]+)\s*\?\s*([^:]+)\s*:\s*(.+?)(?=[\n;,\)]|$)/g, replace: '(($1) and ($2) or ($3))', name: 'ternary operator' },
-    
-    // Lambda/arrow functions
-    { pattern: /\|([^|]*)\|\s*->\s*(.+?)(?=[\n;,\)]|$)/g, replace: 'function($1) return $2 end', name: 'lambda expression' },
-    
-    // String interpolation $"..." or ${...}
-    { pattern: /\$"([^"]*)"/g, replace: (match, str) => convertStringInterpolation(str), name: 'string interpolation' },
-    
-    // Continue statement (convert to goto pattern)
-    { pattern: /\bcontinue\b/g, replace: 'goto continue_label', name: 'continue statement' },
-    
-    // Switch/case (basic conversion)
-    { pattern: /\bswitch\s+(\w+)\s+do/g, replace: 'local _switch_val = $1', name: 'switch statement' },
-    { pattern: /\bcase\s+([^:]+):/g, replace: 'if _switch_val == $1 then', name: 'case statement' },
-    { pattern: /\bdefault:/g, replace: 'else', name: 'default case' },
-    
-    // Pluto's "as" keyword in for loops
-    { pattern: /for\s+(\w+)\s+as\s+(\w+)/g, replace: 'for _, $2 in pairs($1)', name: 'for-as loop' },
-    { pattern: /for\s+(\w+)\s+as\s+(\w+),\s*(\w+)/g, replace: 'for $2, $3 in pairs($1)', name: 'for-as-kv loop' },
-    
-    // Table unpacking shorthand
-    { pattern: /\{:\s*(\w+)\s*:\}/g, replace: '{$1 = $1}', name: 'table shorthand' },
-    
-    // Bitwise operators (if not using bit library)
-    { pattern: /(\w+)\s*\|\s*(\w+)/g, replace: 'bit.bor($1, $2)', name: 'bitwise OR' },
-    { pattern: /(\w+)\s*&\s*(\w+)/g, replace: 'bit.band($1, $2)', name: 'bitwise AND' },
-    { pattern: /~(\w+)/g, replace: 'bit.bnot($1)', name: 'bitwise NOT' },
-    { pattern: /(\w+)\s*<<\s*(\w+)/g, replace: 'bit.lshift($1, $2)', name: 'left shift' },
-    { pattern: /(\w+)\s*>>\s*(\w+)/g, replace: 'bit.rshift($1, $2)', name: 'right shift' },
-    
-    // Increment/decrement (basic)
-    { pattern: /(\w+)\+\+/g, replace: '$1 = $1 + 1', name: '++ operator' },
-    { pattern: /(\w+)--/g, replace: '$1 = $1 - 1', name: '-- operator' },
-    
-    // Export/using (remove or comment out)
-    { pattern: /^export\s+/gm, replace: '-- [PLUTO EXPORT] ', name: 'export keyword' },
-    { pattern: /^using\s+/gm, replace: '-- [PLUTO USING] ', name: 'using keyword' },
-    
-    // Pluto's class syntax (basic conversion)
-    { pattern: /class\s+(\w+)\s*{/g, replace: 'local $1 = {}; $1.__index = $1; -- class $1', name: 'class declaration' },
-    { pattern: /new\s+(\w+)\s*\(/g, replace: '$1.new(', name: 'new keyword' }
-];
-
-function convertStringInterpolation(str) {
-    // Convert $"Hello {name}!" to string.format or concatenation
-    let result = str.replace(/\{([^}]+)\}/g, '" .. tostring($1) .. "');
-    return '"' + result + '"';
-}
-
-// =============================================================================
-// STAND API TO CHERAX API MAPPINGS
-// =============================================================================
-
-const API_MAPPINGS = {
-    // =========================================================================
-    // MENU FUNCTIONS
-    // =========================================================================
-    menu: {
-        // Root and basic menu
-        'menu.my_root()': { 
-            replacement: 'Cherax.GetTab()',
-            note: 'Gets main script tab',
-            complex: true,
-            handler: (match, context) => {
-                return 'Cherax.GetTab()';
+        async function loadData() {
+            try {
+                const result = await window.storage.get('weekData');
+                if (result && result.value) {
+                    weekData = JSON.parse(result.value);
+                } else {
+                    weekData = initializeWeekData();
+                    await saveData();
+                }
+            } catch (e) {
+                weekData = initializeWeekData();
             }
-        },
-        'menu.player_root': {
-            pattern: /menu\.player_root\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Cherax.GetPlayersTab():GetSubTab(Players.GetById($1):GetName())',
-            note: 'Player-specific menu root'
-        },
-        'menu.shadow_root()': {
-            replacement: 'nil -- shadow_root not needed in Cherax',
-            note: 'Not applicable in Cherax'
-        },
-        
-        // Menu creation functions
-        'menu.list': {
-            pattern: /(\w+)?:?list\s*\(\s*["']([^"']+)["']\s*(?:,\s*\{[^}]*\})?\s*(?:,\s*["']([^"']*)["'])?\s*(?:,\s*(function[^)]*\)[^e]*end))?\s*\)/g,
-            handler: 'createSubTab',
-            note: 'Creates submenu/tab'
-        },
-        'menu.action': {
-            pattern: /(\w+)?:?action\s*\(\s*["']([^"']+)["']\s*,\s*\{[^}]*\}\s*,\s*["']([^"']*)["']\s*,\s*(function[^)]*\)[^}]*end)\s*\)/g,
-            handler: 'createAction',
-            note: 'Creates action button'
-        },
-        'menu.toggle': {
-            pattern: /(\w+)?:?toggle\s*\(\s*["']([^"']+)["']\s*,\s*\{[^}]*\}\s*,\s*["']([^"']*)["']\s*,\s*(function[^)]*end)\s*(?:,\s*(true|false))?\s*\)/g,
-            handler: 'createToggle',
-            note: 'Creates toggle'
-        },
-        'menu.toggle_loop': {
-            pattern: /(\w+)?:?toggle_loop\s*\(\s*["']([^"']+)["']\s*,\s*\{[^}]*\}\s*,\s*["']([^"']*)["']\s*,\s*(function[^)]*end)\s*(?:,\s*(function[^)]*end))?\s*\)/g,
-            handler: 'createToggleLoop',
-            note: 'Creates looped toggle'
-        },
-        'menu.slider': {
-            pattern: /(\w+)?:?slider\s*\(\s*["']([^"']+)["']\s*,\s*\{[^}]*\}\s*,\s*["']([^"']*)["']\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(\d+)\s*,\s*(function[^)]*end)\s*\)/g,
-            handler: 'createSlider',
-            note: 'Creates integer slider'
-        },
-        'menu.slider_float': {
-            pattern: /(\w+)?:?slider_float\s*\(\s*["']([^"']+)["']\s*,\s*\{[^}]*\}\s*,\s*["']([^"']*)["']\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*([\d.]+)\s*,\s*(function[^)]*end)\s*\)/g,
-            handler: 'createSliderFloat',
-            note: 'Creates float slider'
-        },
-        'menu.text_input': {
-            pattern: /(\w+)?:?text_input\s*\(\s*["']([^"']+)["']\s*,\s*\{[^}]*\}\s*,\s*["']([^"']*)["']\s*,\s*(function[^)]*end)\s*(?:,\s*["']([^"']*)["'])?\s*\)/g,
-            handler: 'createTextInput',
-            note: 'Creates text input'
-        },
-        'menu.list_select': {
-            pattern: /(\w+)?:?list_select\s*\(\s*["']([^"']+)["']\s*,\s*\{[^}]*\}\s*,\s*["']([^"']*)["']\s*,\s*(\{[^}]+\})\s*,\s*(\d+)\s*,\s*(function[^)]*end)\s*\)/g,
-            handler: 'createComboBox',
-            note: 'Creates combo/dropdown'
-        },
-        'menu.list_action': {
-            pattern: /(\w+)?:?list_action\s*\(\s*["']([^"']+)["']\s*,\s*\{[^}]*\}\s*,\s*["']([^"']*)["']\s*,\s*(\{[^}]+\})\s*,\s*(function[^)]*end)\s*\)/g,
-            handler: 'createListAction',
-            note: 'Creates action list'
-        },
-        'menu.colour': {
-            pattern: /(\w+)?:?colou?r\s*\(\s*["']([^"']+)["']/g,
-            handler: 'createColorPicker',
-            note: 'Creates color picker'
-        },
-        'menu.divider': {
-            pattern: /(\w+)?:?divider\s*\(\s*["']([^"']+)["']\s*\)/g,
-            replacement: '$1:AddSeparator("$2")',
-            note: 'Creates separator'
-        },
-        'menu.readonly': {
-            pattern: /(\w+)?:?readonly\s*\(\s*["']([^"']+)["']\s*(?:,\s*["']([^"']*)["'])?\s*\)/g,
-            handler: 'createReadonly',
-            note: 'Creates readonly text'
-        },
-        'menu.hyperlink': {
-            pattern: /(\w+)?:?hyperlink\s*\(\s*["']([^"']+)["']\s*,\s*["']([^"']+)["']/g,
-            handler: 'createHyperlink',
-            note: 'Creates hyperlink'
-        },
-        
-        // Menu state functions
-        'menu.get_value': {
-            pattern: /menu\.get_value\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'FeatureMgr.GetFeature($1):GetValueAsInt()',
-            note: 'Gets feature value'
-        },
-        'menu.set_value': {
-            pattern: /menu\.set_value\s*\(\s*(\w+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: 'FeatureMgr.GetFeature($1):SetIntValue($2)',
-            note: 'Sets feature value'
-        },
-        'menu.get_visible': {
-            pattern: /menu\.get_visible\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'true -- visibility check',
-            note: 'Visibility not directly available'
-        },
-        'menu.set_visible': {
-            pattern: /menu\.set_visible\s*\(\s*(\w+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: '-- set_visible: $1 = $2 (use feature state instead)',
-            note: 'Use feature state'
-        },
-        'menu.trigger_command': {
-            pattern: /menu\.trigger_command\s*\(\s*(\w+)\s*(?:,\s*["']([^"']*)["'])?\s*\)/g,
-            replacement: 'FeatureMgr.GetFeature($1):Toggle()',
-            note: 'Triggers feature'
-        },
-        'menu.focus': {
-            pattern: /menu\.focus\s*\(\s*(\w+)\s*\)/g,
-            replacement: '-- menu.focus not available in Cherax',
-            note: 'Not available'
-        },
-        'menu.delete': {
-            pattern: /menu\.delete\s*\(\s*(\w+)\s*\)/g,
-            replacement: '-- menu.delete: remove feature $1',
-            note: 'Manual removal needed'
-        },
-        'menu.is_open': {
-            pattern: /menu\.is_open\s*\(\s*\)/g,
-            replacement: 'Cherax.IsMenuOpen()',
-            note: 'Checks if menu open'
-        },
-        'menu.ref_by_path': {
-            pattern: /menu\.ref_by_path\s*\(\s*["']([^"']+)["']/g,
-            replacement: '-- ref_by_path: "$1" (use FeatureMgr.GetFeature)',
-            note: 'Use feature hash'
+            
+            try {
+                const weekResult = await window.storage.get('currentWeek');
+                if (weekResult && weekResult.value) {
+                    currentWeek = parseInt(weekResult.value);
+                }
+            } catch (e) {
+                currentWeek = 1;
+            }
         }
-    },
 
-    // =========================================================================
-    // PLAYERS FUNCTIONS
-    // =========================================================================
-    players: {
-        'players.user()': {
-            replacement: 'GTA.GetLocalPlayerId()',
-            note: 'Local player ID'
-        },
-        'players.user_ped()': {
-            replacement: 'GTA.GetLocalPed().Handle',
-            note: 'Local ped handle'
-        },
-        'players.get_name': {
-            pattern: /players\.get_name\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Players.GetById($1):GetName()',
-            note: 'Gets player name'
-        },
-        'players.get_rockstar_id': {
-            pattern: /players\.get_rockstar_id\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Players.GetById($1):GetRockstarId()',
-            note: 'Gets RID'
-        },
-        'players.get_ip': {
-            pattern: /players\.get_ip\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Players.GetById($1):GetExternalAddress().IPv4',
-            note: 'Gets IP address'
-        },
-        'players.get_ip_string': {
-            pattern: /players\.get_ip_string\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Players.GetById($1):GetExternalAddress():ToString(false)',
-            note: 'Gets IP as string'
-        },
-        'players.get_position': {
-            pattern: /players\.get_position\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Players.GetCPed($1).Position',
-            note: 'Gets player position'
-        },
-        'players.get_host': {
-            pattern: /players\.get_host\s*\(\s*\)/g,
-            replacement: 'Players.GetHost():GetId()',
-            note: 'Gets session host'
-        },
-        'players.get_script_host': {
-            pattern: /players\.get_script_host\s*\(\s*\)/g,
-            replacement: 'Players.GetScriptHost():GetId()',
-            note: 'Gets script host'
-        },
-        'players.exists': {
-            pattern: /players\.exists\s*\(\s*(\w+)\s*\)/g,
-            replacement: '(Players.GetById($1) ~= nil)',
-            note: 'Checks if player exists'
-        },
-        'players.list': {
-            pattern: /players\.list\s*\(\s*\)/g,
-            handler: 'createPlayerList',
-            note: 'Gets all players'
-        },
-        'players.get_rank': {
-            pattern: /players\.get_rank\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Players.GetById($1):GetRank()',
-            note: 'Gets player rank'
-        },
-        'players.get_money': {
-            pattern: /players\.get_money\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Players.GetById($1):GetMoney()',
-            note: 'Gets player money'
-        },
-        'players.get_wallet': {
-            pattern: /players\.get_wallet\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Players.GetById($1):GetWallet()',
-            note: 'Gets wallet money'
-        },
-        'players.get_bank': {
-            pattern: /players\.get_bank\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Players.GetById($1):GetBank()',
-            note: 'Gets bank money'
-        },
-        'players.get_kd': {
-            pattern: /players\.get_kd\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Players.GetById($1):GetKD()',
-            note: 'Gets K/D ratio'
-        },
-        'players.is_godmode': {
-            pattern: /players\.is_godmode\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Players.GetById($1):IsGodmode()',
-            note: 'Checks godmode'
-        },
-        'players.is_in_vehicle': {
-            pattern: /players\.is_in_vehicle\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Players.GetById($1):IsInVehicle()',
-            note: 'Checks if in vehicle'
-        },
-        'players.get_vehicle_model': {
-            pattern: /players\.get_vehicle_model\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Players.GetById($1):GetVehicleModelHash()',
-            note: 'Gets vehicle model'
-        },
-        'players.on_join': {
-            pattern: /players\.on_join\s*\(\s*(function[^)]*\)[^e]*end)\s*\)/g,
-            handler: 'createOnJoin',
-            note: 'Player join event'
-        },
-        'players.on_leave': {
-            pattern: /players\.on_leave\s*\(\s*(function[^)]*\)[^e]*end)\s*\)/g,
-            handler: 'createOnLeave',
-            note: 'Player leave event'
-        },
-        'players.add_command_hook': {
-            pattern: /players\.add_command_hook\s*\(\s*(function[^)]*\)[^e]*end)\s*\)/g,
-            handler: 'createCommandHook',
-            note: 'Per-player features'
-        },
-        'players.get_cam_pos': {
-            pattern: /players\.get_cam_pos\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Players.GetById($1):GetCameraPosition()',
-            note: 'Gets camera position'
-        },
-        'players.get_waypoint': {
-            pattern: /players\.get_waypoint\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Players.GetById($1):GetWaypoint()',
-            note: 'Gets waypoint'
-        },
-        'players.send_sms': {
-            pattern: /players\.send_sms\s*\(\s*(\w+)\s*,\s*["']([^"']+)["']\s*\)/g,
-            replacement: '-- send_sms to $1: "$2" (use script event)',
-            note: 'Use script events'
-        },
-        'players.get_host_token': {
-            pattern: /players\.get_host_token\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'tostring(Players.GetById($1):GetHostToken())',
-            note: 'Gets host token'
-        },
-        'players.get_language': {
-            pattern: /players\.get_language\s*\(\s*(\w+)\s*\)/g,
-            replacement: 'Players.GetById($1):GetLanguage()',
-            note: 'Gets language ID'
+        async function saveData() {
+            try {
+                await window.storage.set('weekData', JSON.stringify(weekData));
+                await window.storage.set('currentWeek', currentWeek.toString());
+            } catch (e) {
+                console.error('Failed to save data:', e);
+            }
         }
-    },
 
-    // =========================================================================
-    // ENTITIES FUNCTIONS
-    // =========================================================================
-    entities: {
-        'entities.create_ped': {
-            pattern: /entities\.create_ped\s*\(\s*(\d+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: 'GTA.CreatePed($1, $2, $3, $4)',
-            note: 'Creates ped'
-        },
-        'entities.create_vehicle': {
-            pattern: /entities\.create_vehicle\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: 'GTA.SpawnVehicle($1, $2, $3)',
-            note: 'Creates vehicle'
-        },
-        'entities.create_object': {
-            pattern: /entities\.create_object\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: 'GTA.CreateObject($1, $2)',
-            note: 'Creates object'
-        },
-        'entities.delete': {
-            pattern: /entities\.delete\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'ENTITY.DELETE_ENTITY($1)',
-            note: 'Deletes entity'
-        },
-        'entities.get_all_vehicles_as_handles': {
-            pattern: /entities\.get_all_vehicles_as_handles\s*\(\s*\)/g,
-            handler: 'getAllVehicles',
-            note: 'Gets all vehicles'
-        },
-        'entities.get_all_peds_as_handles': {
-            pattern: /entities\.get_all_peds_as_handles\s*\(\s*\)/g,
-            handler: 'getAllPeds',
-            note: 'Gets all peds'
-        },
-        'entities.get_all_objects_as_handles': {
-            pattern: /entities\.get_all_objects_as_handles\s*\(\s*\)/g,
-            handler: 'getAllObjects',
-            note: 'Gets all objects'
-        },
-        'entities.get_all_pickups_as_handles': {
-            pattern: /entities\.get_all_pickups_as_handles\s*\(\s*\)/g,
-            handler: 'getAllPickups',
-            note: 'Gets all pickups'
-        },
-        'entities.handle_to_pointer': {
-            pattern: /entities\.handle_to_pointer\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.HandleToPtr($1)',
-            note: 'Handle to pointer'
-        },
-        'entities.pointer_to_handle': {
-            pattern: /entities\.pointer_to_handle\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.PtrToHandle($1)',
-            note: 'Pointer to handle'
-        },
-        'entities.get_user_vehicle_as_handle': {
-            pattern: /entities\.get_user_vehicle_as_handle\s*\(\s*\)/g,
-            replacement: 'PED.GET_VEHICLE_PED_IS_IN(GTA.GetLocalPed().Handle, false)',
-            note: 'Gets user vehicle'
-        },
-        'entities.get_position': {
-            pattern: /entities\.get_position\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'ENTITY.GET_ENTITY_COORDS($1, true)',
-            note: 'Gets entity position'
-        },
-        'entities.get_rotation': {
-            pattern: /entities\.get_rotation\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'ENTITY.GET_ENTITY_ROTATION($1, 2)',
-            note: 'Gets entity rotation'
-        },
-        'entities.get_health': {
-            pattern: /entities\.get_health\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'ENTITY.GET_ENTITY_HEALTH($1)',
-            note: 'Gets entity health'
-        },
-        'entities.get_model_hash': {
-            pattern: /entities\.get_model_hash\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'ENTITY.GET_ENTITY_MODEL($1)',
-            note: 'Gets model hash'
-        },
-        'entities.request_control': {
-            pattern: /entities\.request_control\s*\(\s*([^,)]+)(?:\s*,\s*\d+)?\s*\)/g,
-            replacement: 'NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY($1)',
-            note: 'Requests entity control'
-        },
-        'entities.get_owner': {
-            pattern: /entities\.get_owner\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'NETWORK.NETWORK_GET_ENTITY_OWNER($1)',
-            note: 'Gets entity owner'
-        },
-        'entities.give_control': {
-            pattern: /entities\.give_control\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: 'NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY($1)',
-            note: 'Gives entity control'
-        },
-        'entities.vehicle_get_handling': {
-            pattern: /entities\.vehicle_get_handling\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'GetVehicleHandlingPtr($1)',
-            note: 'Gets handling pointer'
-        },
-        'entities.set_can_migrate': {
-            pattern: /entities\.set_can_migrate\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: '-- set_can_migrate: $1 = $2',
-            note: 'Migration control'
-        },
-        'entities.is_player_ped': {
-            pattern: /entities\.is_player_ped\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'PED.IS_PED_A_PLAYER($1)',
-            note: 'Checks if player ped'
+        function initializeWeekData() {
+            const data = {};
+            for (let week = 1; week <= 52; week++) {
+                data[week] = {};
+                DAYS.forEach(day => {
+                    data[week][day] = DEFAULT_TASKS[day].map(task => ({
+                        name: task,
+                        completed: false
+                    }));
+                });
+            }
+            return data;
         }
-    },
 
-    // =========================================================================
-    // UTIL FUNCTIONS
-    // =========================================================================
-    util: {
-        'util.require_natives': {
-            pattern: /util\.require_natives\s*\([^)]*\)/g,
-            replacement: '-- Natives are built-in to Cherax',
-            note: 'Not needed in Cherax'
-        },
-        'util.yield': {
-            pattern: /util\.yield\s*\(\s*(\d+)?\s*\)/g,
-            handler: 'convertYield',
-            note: 'Script yield'
-        },
-        'util.toast': {
-            pattern: /util\.toast\s*\(\s*([^,)]+)(?:\s*,\s*[^)]+)?\s*\)/g,
-            replacement: 'Logger.Log(LogLevel.Info, $1)',
-            note: 'Shows notification'
-        },
-        'util.log': {
-            pattern: /util\.log\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'Logger.Log(LogLevel.Info, $1)',
-            note: 'Logs message'
-        },
-        'util.joaat': {
-            pattern: /util\.joaat\s*\(\s*["']([^"']+)["']\s*\)/g,
-            replacement: 'joaat("$1")',
-            note: 'Jenkins hash'
-        },
-        'util.create_tick_handler': {
-            pattern: /util\.create_tick_handler\s*\(\s*(function[^)]*\)[\s\S]*?end)\s*\)/g,
-            handler: 'createTickHandler',
-            note: 'Creates tick handler'
-        },
-        'util.create_thread': {
-            pattern: /util\.create_thread\s*\(\s*(function[^)]*\)[\s\S]*?end)\s*\)/g,
-            handler: 'createThread',
-            note: 'Creates thread'
-        },
-        'util.keep_running': {
-            pattern: /util\.keep_running\s*\(\s*\)/g,
-            replacement: '-- keep_running: script stays active',
-            note: 'Script persistence'
-        },
-        'util.stop_script': {
-            pattern: /util\.stop_script\s*\(\s*\)/g,
-            replacement: '-- Script stop requested',
-            note: 'Stops script'
-        },
-        'util.on_stop': {
-            pattern: /util\.on_stop\s*\(\s*(function[^)]*\)[\s\S]*?end)\s*\)/g,
-            handler: 'createOnStop',
-            note: 'Script stop handler'
-        },
-        'util.current_time_millis': {
-            pattern: /util\.current_time_millis\s*\(\s*\)/g,
-            replacement: 'Time.GetEpocheMs()',
-            note: 'Current time in ms'
-        },
-        'util.is_session_started': {
-            pattern: /util\.is_session_started\s*\(\s*\)/g,
-            replacement: 'NETWORK.NETWORK_IS_SESSION_STARTED()',
-            note: 'Session check'
-        },
-        'util.is_session_transition_active': {
-            pattern: /util\.is_session_transition_active\s*\(\s*\)/g,
-            replacement: 'NETWORK.NETWORK_IS_IN_TRANSITION()',
-            note: 'Transition check'
-        },
-        'util.draw_debug_text': {
-            pattern: /util\.draw_debug_text\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'DrawText($1, 0.5, 0.1)',
-            note: 'Debug text drawing'
-        },
-        'util.spoof_script': {
-            pattern: /util\.spoof_script\s*\(\s*([^,]+)\s*,\s*(function[^)]*\)[\s\S]*?end)\s*\)/g,
-            replacement: 'Script.ExecuteAsScript($1, $2)',
-            note: 'Script spoofing'
-        },
-        'util.trigger_script_event': {
-            pattern: /util\.trigger_script_event\s*\(\s*([^,]+)\s*,\s*(\{[^}]+\})\s*\)/g,
-            replacement: 'TriggerScriptEvent($1, $2)',
-            note: 'Script events'
-        },
-        'util.get_char_slot': {
-            pattern: /util\.get_char_slot\s*\(\s*\)/g,
-            replacement: 'STATS.STAT_GET_INT(joaat("MPPLY_LAST_MP_CHAR"), 0, -1)',
-            note: 'Character slot'
-        },
-        'util.request_model': {
-            pattern: /util\.request_model\s*\(\s*([^,)]+)(?:\s*,\s*\d+)?\s*\)/g,
-            replacement: 'RequestModel($1)',
-            note: 'Model request'
-        },
-        'util.is_key_down': {
-            pattern: /util\.is_key_down\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'PAD.IS_DISABLED_CONTROL_PRESSED(0, $1)',
-            note: 'Key check'
-        },
-        'util.copy_to_clipboard': {
-            pattern: /util\.copy_to_clipboard\s*\(\s*([^,)]+)(?:\s*,\s*[^)]+)?\s*\)/g,
-            replacement: 'Clipboard.Set($1)',
-            note: 'Clipboard copy'
-        },
-        'util.get_clipboard_text': {
-            pattern: /util\.get_clipboard_text\s*\(\s*\)/g,
-            replacement: 'Clipboard.Get()',
-            note: 'Clipboard get'
-        },
-        'util.draw_box': {
-            pattern: /util\.draw_box\s*\(/g,
-            replacement: 'DrawBox(',
-            note: 'Box drawing'
-        },
-        'util.draw_sphere': {
-            pattern: /util\.draw_sphere\s*\(/g,
-            replacement: 'DrawSphere(',
-            note: 'Sphere drawing'
-        },
-        'util.draw_ar_beacon': {
-            pattern: /util\.draw_ar_beacon\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'DrawMarker(1, $1)',
-            note: 'Beacon drawing'
-        },
-        'util.get_ground_z': {
-            pattern: /util\.get_ground_z\s*\(\s*([^,]+)\s*,\s*([^,]+)(?:\s*,\s*[^)]+)?\s*\)/g,
-            replacement: 'GetGroundZ($1, $2)',
-            note: 'Ground Z coord'
-        },
-        'util.BEGIN_TEXT_COMMAND_DISPLAY_TEXT': {
-            pattern: /util\.BEGIN_TEXT_COMMAND_DISPLAY_TEXT\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'BeginTextCommand($1)',
-            note: 'Text command'
-        },
-        'util.get_label_text': {
-            pattern: /util\.get_label_text\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'HUD.GET_FILENAME_FOR_AUDIO_CONVERSATION($1)',
-            note: 'Label text'
-        },
-        'util.register_file': {
-            pattern: /util\.register_file\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'STREAMING.REQUEST_STREAMED_TEXTURE_DICT($1, true)',
-            note: 'File registration'
+        function getCurrentWeekData() {
+            if (!weekData[currentWeek]) {
+                weekData[currentWeek] = {};
+                DAYS.forEach(day => {
+                    weekData[currentWeek][day] = DEFAULT_TASKS[day].map(task => ({
+                        name: task,
+                        completed: false
+                    }));
+                });
+            }
+            return weekData[currentWeek];
         }
-    },
 
-    // =========================================================================
-    // MEMORY FUNCTIONS
-    // =========================================================================
-    memory: {
-        'memory.script_global': {
-            pattern: /memory\.script_global\s*\(\s*(\d+)\s*\)/g,
-            replacement: 'ScriptGlobal.GetPtr($1)',
-            note: 'Global pointer'
-        },
-        'memory.script_local': {
-            pattern: /memory\.script_local\s*\(\s*([^,]+)\s*,\s*(\d+)\s*\)/g,
-            replacement: 'ScriptLocal.GetPtr($1, $2)',
-            note: 'Local pointer'
-        },
-        'memory.read_int': {
-            pattern: /memory\.read_int\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.ReadI32($1)',
-            note: 'Read int32'
-        },
-        'memory.read_uint': {
-            pattern: /memory\.read_uint\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.ReadU32($1)',
-            note: 'Read uint32'
-        },
-        'memory.read_long': {
-            pattern: /memory\.read_long\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.ReadI64($1)',
-            note: 'Read int64'
-        },
-        'memory.read_float': {
-            pattern: /memory\.read_float\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.ReadFloat($1)',
-            note: 'Read float'
-        },
-        'memory.read_byte': {
-            pattern: /memory\.read_byte\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.ReadI8($1)',
-            note: 'Read byte'
-        },
-        'memory.read_short': {
-            pattern: /memory\.read_short\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.ReadI16($1)',
-            note: 'Read short'
-        },
-        'memory.read_string': {
-            pattern: /memory\.read_string\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.ReadString($1)',
-            note: 'Read string'
-        },
-        'memory.read_vector3': {
-            pattern: /memory\.read_vector3\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.ReadVector3($1)',
-            note: 'Read vector3'
-        },
-        'memory.write_int': {
-            pattern: /memory\.write_int\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.WriteI32($1, $2)',
-            note: 'Write int32'
-        },
-        'memory.write_uint': {
-            pattern: /memory\.write_uint\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.WriteU32($1, $2)',
-            note: 'Write uint32'
-        },
-        'memory.write_long': {
-            pattern: /memory\.write_long\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.WriteI64($1, $2)',
-            note: 'Write int64'
-        },
-        'memory.write_float': {
-            pattern: /memory\.write_float\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.WriteFloat($1, $2)',
-            note: 'Write float'
-        },
-        'memory.write_byte': {
-            pattern: /memory\.write_byte\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.WriteI8($1, $2)',
-            note: 'Write byte'
-        },
-        'memory.write_string': {
-            pattern: /memory\.write_string\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.WriteString($1, $2)',
-            note: 'Write string'
-        },
-        'memory.write_vector3': {
-            pattern: /memory\.write_vector3\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.WriteVector3($1, $2)',
-            note: 'Write vector3'
-        },
-        'memory.alloc': {
-            pattern: /memory\.alloc\s*\(\s*(\d+)?\s*\)/g,
-            replacement: 'Memory.Alloc($1 or 24)',
-            note: 'Memory allocation'
-        },
-        'memory.alloc_int': {
-            pattern: /memory\.alloc_int\s*\(\s*\)/g,
-            replacement: 'Memory.Alloc(4)',
-            note: 'Alloc int'
-        },
-        'memory.scan': {
-            pattern: /memory\.scan\s*\(\s*["']([^"']+)["']\s*\)/g,
-            replacement: 'Memory.Scan("$1")',
-            note: 'Pattern scan'
-        },
-        'memory.rip': {
-            pattern: /memory\.rip\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'Memory.Rip($1)',
-            note: 'RIP relative'
-        },
-        'memory.tunable': {
-            pattern: /memory\.tunable\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'ScriptGlobal.GetTunableByHash($1)',
-            note: 'Tunable pointer'
+        function render() {
+            const grid = document.getElementById('daysGrid');
+            const data = getCurrentWeekData();
+            
+            grid.innerHTML = '';
+            
+            DAYS.forEach(day => {
+                const dayCard = document.createElement('div');
+                dayCard.className = 'day-card';
+                
+                if (day === 'SUN') {
+                    dayCard.classList.add('rest-day');
+                }
+                
+                const tasks = data[day] || [];
+                const completed = tasks.filter(t => t.completed).length;
+                const total = tasks.length;
+                
+                dayCard.innerHTML = `
+                    <div class="day-header">
+                        <div class="day-name">${day}</div>
+                        <div class="day-score">${day === 'SUN' ? 'Rest Day' : `${completed}/${total}`}</div>
+                    </div>
+                    <ul class="tasks-list" id="tasks-${day}"></ul>
+                    ${day !== 'SUN' ? `<button class="add-task-btn" onclick="addTask('${day}')">+ Add Task</button>` : ''}
+                `;
+                
+                grid.appendChild(dayCard);
+                
+                const tasksList = document.getElementById(`tasks-${day}`);
+                tasks.forEach((task, index) => {
+                    const taskItem = document.createElement('li');
+                    taskItem.className = 'task-item' + (task.completed ? ' completed' : '');
+                    taskItem.innerHTML = `
+                        <input type="checkbox" class="task-checkbox" 
+                               ${task.completed ? 'checked' : ''} 
+                               onchange="toggleTask('${day}', ${index})">
+                        <span class="task-label" onclick="toggleTask('${day}', ${index})">${task.name}</span>
+                        <button class="task-edit" onclick="editTask('${day}', ${index})">✎</button>
+                    `;
+                    tasksList.appendChild(taskItem);
+                });
+            });
+            
+            updateScore();
+            document.getElementById('weekTitle').textContent = `WEEK ${currentWeek}`;
         }
-    },
 
-    // =========================================================================
-    // DIRECTX FUNCTIONS
-    // =========================================================================
-    directx: {
-        'directx.draw_text': {
-            pattern: /directx\.draw_text\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*,\s*\{[^}]*\}/g,
-            replacement: 'ImGui.AddText($1, $2, $3, 255, 255, 255, 255)',
-            note: 'Draw text'
-        },
-        'directx.draw_rect': {
-            pattern: /directx\.draw_rect\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*,\s*\{([^}]*)\}/g,
-            replacement: 'ImGui.AddRectFilled($1, $2, $1+$3, $2+$4, $5)',
-            note: 'Draw rectangle'
-        },
-        'directx.draw_line': {
-            pattern: /directx\.draw_line\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*,\s*\{([^}]*)\}/g,
-            replacement: 'ImGui.AddLine($1, $2, $3, $4, $5)',
-            note: 'Draw line'
-        },
-        'directx.draw_texture': {
-            pattern: /directx\.draw_texture\s*\(/g,
-            replacement: 'ImGui.AddImage(',
-            note: 'Draw texture'
-        },
-        'directx.create_texture': {
-            pattern: /directx\.create_texture\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'Texture.LoadTexture($1)',
-            note: 'Create texture'
-        },
-        'directx.draw_circle': {
-            pattern: /directx\.draw_circle\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*,\s*\{([^}]*)\}/g,
-            replacement: 'ImGui.AddCircleFilled($1, $2, $3, $4)',
-            note: 'Draw circle'
-        },
-        'directx.draw_triangle': {
-            pattern: /directx\.draw_triangle\s*\(/g,
-            replacement: 'ImGui.AddTriangleFilled(',
-            note: 'Draw triangle'
-        },
-        'directx.get_client_size': {
-            pattern: /directx\.get_client_size\s*\(\s*\)/g,
-            replacement: 'ImGui.GetDisplaySize()',
-            note: 'Screen size'
+        function updateScore() {
+            const data = getCurrentWeekData();
+            let totalCompleted = 0;
+            let totalTasks = 0;
+            
+            DAYS.forEach(day => {
+                if (day !== 'SUN') {
+                    const tasks = data[day] || [];
+                    totalTasks += tasks.length;
+                    totalCompleted += tasks.filter(t => t.completed).length;
+                }
+            });
+            
+            document.getElementById('totalScore').textContent = `${totalCompleted}/${totalTasks}`;
+            
+            const percentage = totalTasks > 0 ? (totalCompleted / totalTasks) * 100 : 0;
+            let message = '';
+            
+            if (percentage === 100) {
+                message = '🔥 ABSOLUTE BEAST MODE 🔥';
+            } else if (percentage >= 90) {
+                message = '⚡ CRUSHING IT ⚡';
+            } else if (percentage >= 75) {
+                message = '💪 SOLID WEEK 💪';
+            } else if (percentage >= 60) {
+                message = '📈 Keep pushing';
+            } else if (percentage >= 40) {
+                message = '⚠️ You\'re slipping - lock in';
+            } else {
+                message = '❌ Not good enough - where\'s the discipline?';
+            }
+            
+            document.getElementById('scoreMessage').textContent = message;
         }
-    },
 
-    // =========================================================================
-    // CHAT FUNCTIONS
-    // =========================================================================
-    chat: {
-        'chat.send_message': {
-            pattern: /chat\.send_message\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: 'NETWORK.NETWORK_SEND_TEXT_MESSAGE($1, NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(GTA.GetLocalPed().Handle))',
-            note: 'Send chat message'
-        },
-        'chat.on_message': {
-            pattern: /chat\.on_message\s*\(\s*(function[^)]*\)[\s\S]*?end)\s*\)/g,
-            handler: 'createChatHandler',
-            note: 'Chat message handler'
-        },
-        'chat.is_open': {
-            pattern: /chat\.is_open\s*\(\s*\)/g,
-            replacement: 'HUD.IS_MP_TEXT_CHAT_TYPING()',
-            note: 'Chat open check'
+        async function toggleTask(day, index) {
+            const data = getCurrentWeekData();
+            data[day][index].completed = !data[day][index].completed;
+            await saveData();
+            render();
         }
-    },
 
-    // =========================================================================
-    // V3/VECTOR FUNCTIONS
-    // =========================================================================
-    v3: {
-        'v3.new': {
-            pattern: /v3\.new\s*\(\s*([^,)]*)\s*(?:,\s*([^,)]*))?\s*(?:,\s*([^)]*))?\s*\)/g,
-            replacement: 'vector3($1, $2 or 0, $3 or 0)',
-            note: 'Create vector3'
-        },
-        'v3()': {
-            pattern: /v3\s*\(\s*([^,)]*)\s*(?:,\s*([^,)]*))?\s*(?:,\s*([^)]*))?\s*\)/g,
-            replacement: 'vector3($1, $2 or 0, $3 or 0)',
-            note: 'Create vector3'
-        },
-        'v3.distance': {
-            pattern: /v3\.distance\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: 'MISC.GET_DISTANCE_BETWEEN_COORDS($1.x, $1.y, $1.z, $2.x, $2.y, $2.z, true)',
-            note: 'Vector distance'
-        },
-        'v3.toDir': {
-            pattern: /:toDir\s*\(\s*\)/g,
-            replacement: ':ToDirection()',
-            note: 'To direction'
-        },
-        'v3.lookAt': {
-            pattern: /v3\.lookAt\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/g,
-            replacement: 'GetLookAtRotation($1, $2)',
-            note: 'Look at rotation'
+        function addTask(day) {
+            editingTask = { day, index: -1 };
+            document.getElementById('modalTitle').textContent = `Add Task - ${day}`;
+            document.getElementById('taskInput').value = '';
+            document.getElementById('deleteBtn').style.display = 'none';
+            document.getElementById('taskModal').classList.add('active');
+            document.getElementById('taskInput').focus();
         }
-    },
 
-    // =========================================================================
-    // FILESYSTEM FUNCTIONS
-    // =========================================================================
-    filesystem: {
-        'filesystem.scripts_dir': {
-            pattern: /filesystem\.scripts_dir\s*\(\s*\)/g,
-            replacement: 'Paths.GetScriptsPath()',
-            note: 'Scripts directory'
-        },
-        'filesystem.resources_dir': {
-            pattern: /filesystem\.resources_dir\s*\(\s*\)/g,
-            replacement: 'Paths.GetResourcesPath()',
-            note: 'Resources directory'
-        },
-        'filesystem.store_dir': {
-            pattern: /filesystem\.store_dir\s*\(\s*\)/g,
-            replacement: 'Paths.GetDataPath()',
-            note: 'Store directory'
-        },
-        'filesystem.stand_dir': {
-            pattern: /filesystem\.stand_dir\s*\(\s*\)/g,
-            replacement: 'Paths.GetCheraxPath()',
-            note: 'Main directory'
-        },
-        'filesystem.exists': {
-            pattern: /filesystem\.exists\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'FileExists($1)',
-            note: 'File exists check'
-        },
-        'filesystem.is_dir': {
-            pattern: /filesystem\.is_dir\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'IsDirectory($1)',
-            note: 'Is directory'
-        },
-        'filesystem.mkdir': {
-            pattern: /filesystem\.mkdir\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'CreateDirectory($1)',
-            note: 'Create directory'
-        },
-        'filesystem.list_files': {
-            pattern: /filesystem\.list_files\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'ListFiles($1)',
-            note: 'List files'
+        function editTask(day, index) {
+            const data = getCurrentWeekData();
+            editingTask = { day, index };
+            document.getElementById('modalTitle').textContent = `Edit Task - ${day}`;
+            document.getElementById('taskInput').value = data[day][index].name;
+            document.getElementById('deleteBtn').style.display = 'block';
+            document.getElementById('taskModal').classList.add('active');
+            document.getElementById('taskInput').focus();
         }
-    },
 
-    // =========================================================================
-    // LANG FUNCTIONS
-    // =========================================================================
-    lang: {
-        'lang.register': {
-            pattern: /lang\.register\s*\(\s*([^)]+)\s*\)/g,
-            replacement: '$1',
-            note: 'Register label'
-        },
-        'lang.get_string': {
-            pattern: /lang\.get_string\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'tostring($1)',
-            note: 'Get string'
-        },
-        'lang.get_localised': {
-            pattern: /lang\.get_localised\s*\(\s*([^)]+)\s*\)/g,
-            replacement: 'tostring($1)',
-            note: 'Get localized'
-        },
-        'lang.find': {
-            pattern: /lang\.find\s*\(\s*([^)]+)\s*\)/g,
-            replacement: '$1',
-            note: 'Find label'
+        async function saveTask() {
+            if (!editingTask) return;
+            
+            const taskName = document.getElementById('taskInput').value.trim();
+            if (!taskName) return;
+            
+            const data = getCurrentWeekData();
+            const { day, index } = editingTask;
+            
+            if (index === -1) {
+                // Adding new task
+                data[day].push({ name: taskName, completed: false });
+            } else {
+                // Editing existing task
+                data[day][index].name = taskName;
+            }
+            
+            await saveData();
+            render();
+            closeModal();
         }
-    },
 
-    // =========================================================================
-    // ASYNC HTTP FUNCTIONS
-    // =========================================================================
-    async_http: {
-        'async_http.init': {
-            pattern: /async_http\.init\s*\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*(function[^)]*\)[\s\S]*?end)\s*(?:,\s*(function[^)]*\)[\s\S]*?end))?\s*\)/g,
-            handler: 'createHttpRequest',
-            note: 'HTTP request'
-        },
-        'async_http.dispatch': {
-            pattern: /async_http\.dispatch\s*\(\s*\)/g,
-            replacement: '-- HTTP request dispatched',
-            note: 'Dispatch request'
-        },
-        'async_http.set_post': {
-            pattern: /async_http\.set_post\s*\(/g,
-            replacement: '-- HTTP POST: ',
-            note: 'Set POST data'
+        async function deleteTask() {
+            if (!editingTask || editingTask.index === -1) return;
+            
+            const data = getCurrentWeekData();
+            const { day, index } = editingTask;
+            
+            data[day].splice(index, 1);
+            
+            await saveData();
+            render();
+            closeModal();
         }
-    }
-};
 
-// =============================================================================
-// HANDLER FUNCTIONS FOR COMPLEX CONVERSIONS
-// =============================================================================
-
-const HANDLERS = {
-    createSubTab: (match, parent, name, desc) => {
-        const varName = `tab_${CONVERTER.menuCounter++}`;
-        return `local ${varName} = ${parent || 'mainTab'}:AddSubTab("${name}", "${desc || ''}")`;
-    },
-    
-    createAction: (match, parent, name, desc, callback) => {
-        CONVERTER.featureCounter++;
-        const hash = `0x${(CONVERTER.featureCounter * 12345).toString(16).toUpperCase()}`;
-        const converted = convertCallback(callback);
-        return `
-local feat_action_${CONVERTER.featureCounter} = FeatureMgr.AddFeature(${hash}, "${name}", "${desc || ''}", FeatureType.Button)
-feat_action_${CONVERTER.featureCounter}.OnChange = ${converted}
-${parent || 'mainTab'}:AddFeature(${hash})`;
-    },
-    
-    createToggle: (match, parent, name, desc, callback, defaultOn) => {
-        CONVERTER.featureCounter++;
-        const hash = `0x${(CONVERTER.featureCounter * 12345).toString(16).toUpperCase()}`;
-        const converted = convertCallback(callback);
-        return `
-local feat_toggle_${CONVERTER.featureCounter} = FeatureMgr.AddFeature(${hash}, "${name}", "${desc || ''}", FeatureType.Toggle)
-feat_toggle_${CONVERTER.featureCounter}.OnChange = ${converted}
-${parent || 'mainTab'}:AddFeature(${hash})`;
-    },
-    
-    createToggleLoop: (match, parent, name, desc, tickCallback, stopCallback) => {
-        CONVERTER.featureCounter++;
-        const hash = `0x${(CONVERTER.featureCounter * 12345).toString(16).toUpperCase()}`;
-        const convertedTick = convertCallback(tickCallback);
-        return `
-local feat_loop_${CONVERTER.featureCounter} = FeatureMgr.AddFeature(${hash}, "${name}", "${desc || ''}", FeatureType.Toggle)
-Script.RegisterLooped(function()
-    if feat_loop_${CONVERTER.featureCounter}:IsToggled() then
-        ${convertedTick.replace(/^function\s*\([^)]*\)/, '').replace(/end$/, '')}
-    end
-    Script.Yield()
-end)
-${parent || 'mainTab'}:AddFeature(${hash})`;
-    },
-    
-    createSlider: (match, parent, name, desc, min, max, def, step, callback) => {
-        CONVERTER.featureCounter++;
-        const hash = `0x${(CONVERTER.featureCounter * 12345).toString(16).toUpperCase()}`;
-        return `
-local feat_slider_${CONVERTER.featureCounter} = FeatureMgr.AddFeature(${hash}, "${name}", "${desc || ''}", FeatureType.IntSlider)
-feat_slider_${CONVERTER.featureCounter}:SetMinValue(${min})
-feat_slider_${CONVERTER.featureCounter}:SetMaxValue(${max})
-feat_slider_${CONVERTER.featureCounter}:SetIntValue(${def})
-${parent || 'mainTab'}:AddFeature(${hash})`;
-    },
-    
-    createSliderFloat: (match, parent, name, desc, min, max, def, step, callback) => {
-        CONVERTER.featureCounter++;
-        const hash = `0x${(CONVERTER.featureCounter * 12345).toString(16).toUpperCase()}`;
-        return `
-local feat_sliderf_${CONVERTER.featureCounter} = FeatureMgr.AddFeature(${hash}, "${name}", "${desc || ''}", FeatureType.FloatSlider)
-feat_sliderf_${CONVERTER.featureCounter}:SetFloatValue(${def})
-${parent || 'mainTab'}:AddFeature(${hash})`;
-    },
-    
-    createTextInput: (match, parent, name, desc, callback, defaultVal) => {
-        CONVERTER.featureCounter++;
-        const hash = `0x${(CONVERTER.featureCounter * 12345).toString(16).toUpperCase()}`;
-        return `
-local feat_input_${CONVERTER.featureCounter} = FeatureMgr.AddFeature(${hash}, "${name}", "${desc || ''}", FeatureType.InputText)
-${parent || 'mainTab'}:AddFeature(${hash})`;
-    },
-    
-    createComboBox: (match, parent, name, desc, options, defaultVal, callback) => {
-        CONVERTER.featureCounter++;
-        const hash = `0x${(CONVERTER.featureCounter * 12345).toString(16).toUpperCase()}`;
-        return `
-local feat_combo_${CONVERTER.featureCounter} = FeatureMgr.AddFeature(${hash}, "${name}", "${desc || ''}", FeatureType.ComboBox)
--- Options: ${options}
-${parent || 'mainTab'}:AddFeature(${hash})`;
-    },
-    
-    createPlayerList: (match) => {
-        return `(function()
-    local plist = {}
-    for i = 0, 31 do
-        local p = Players.GetById(i)
-        if p then table.insert(plist, i) end
-    end
-    return plist
-end)()`;
-    },
-    
-    getAllVehicles: (match) => {
-        return `(function()
-    local vehicles = {}
-    for i = 0, PoolMgr.GetMaxVehicleCount() - 1 do
-        local veh = PoolMgr.GetVehicle(i)
-        if veh ~= -1 then table.insert(vehicles, veh) end
-    end
-    return vehicles
-end)()`;
-    },
-    
-    getAllPeds: (match) => {
-        return `(function()
-    local peds = {}
-    for i = 0, PoolMgr.GetMaxPedCount() - 1 do
-        local ped = PoolMgr.GetPed(i)
-        if ped ~= -1 then table.insert(peds, ped) end
-    end
-    return peds
-end)()`;
-    },
-    
-    getAllObjects: (match) => {
-        return `(function()
-    local objects = {}
-    for i = 0, PoolMgr.GetMaxObjectCount() - 1 do
-        local obj = PoolMgr.GetObject(i)
-        if obj ~= -1 then table.insert(objects, obj) end
-    end
-    return objects
-end)()`;
-    },
-    
-    getAllPickups: (match) => {
-        return `(function()
-    local pickups = {}
-    for i = 0, PoolMgr.GetMaxPickupCount() - 1 do
-        local pickup = PoolMgr.GetPickup(i)
-        if pickup ~= -1 then table.insert(pickups, pickup) end
-    end
-    return pickups
-end)()`;
-    },
-    
-    convertYield: (match, ms) => {
-        if (ms) {
-            return `Script.Yield(${ms})`;
+        function closeModal() {
+            document.getElementById('taskModal').classList.remove('active');
+            editingTask = null;
         }
-        return 'Script.Yield()';
-    },
-    
-    createTickHandler: (match, callback) => {
-        const converted = convertCallback(callback);
-        return `Script.RegisterLooped(${converted})`;
-    },
-    
-    createThread: (match, callback) => {
-        const converted = convertCallback(callback);
-        return `Script.QueueJob(${converted})`;
-    },
-    
-    createOnJoin: (match, callback) => {
-        const converted = convertCallback(callback);
-        return `-- Player join handler (implement with Players iteration)
--- Original: ${match}`;
-    },
-    
-    createOnLeave: (match, callback) => {
-        return `-- Player leave handler
--- Original: ${match}`;
-    },
-    
-    createOnStop: (match, callback) => {
-        return `-- Script stop handler
--- Original: ${match}`;
-    },
-    
-    createChatHandler: (match, callback) => {
-        return `-- Chat message handler (not directly available)
--- Original: ${match}`;
-    },
-    
-    createHttpRequest: (match, host, path, successFn, failFn) => {
-        return `-- HTTP Request to ${host}${path}
--- Implement using external library or remove`;
-    }
-};
 
-function convertCallback(callback) {
-    if (!callback) return 'function() end';
-    // Basic conversion of callback
-    let result = callback
-        .replace(/util\.yield\(\)/g, 'Script.Yield()')
-        .replace(/util\.yield\((\d+)\)/g, 'Script.Yield($1)')
-        .replace(/players\.user\(\)/g, 'GTA.GetLocalPlayerId()')
-        .replace(/players\.user_ped\(\)/g, 'GTA.GetLocalPed().Handle');
-    return result;
-}
-
-// =============================================================================
-// NATIVE HASH UPDATES
-// =============================================================================
-
-const NATIVE_UPDATES = {
-    // Updated/renamed natives
-    'GET_HASH_KEY': { replacement: 'joaat', note: 'Use joaat function' },
-    '_GET_LABEL_TEXT': { replacement: 'GET_FILENAME_FOR_AUDIO_CONVERSATION', note: 'Renamed native' },
-    '_SET_NOTIFICATION_TEXT_ENTRY': { replacement: 'BEGIN_TEXT_COMMAND_THEFEED_POST', note: 'Renamed' },
-    '_DRAW_NOTIFICATION': { replacement: 'END_TEXT_COMMAND_THEFEED_POST_TICKER', note: 'Renamed' },
-    'SET_PED_ARMOUR': { replacement: 'ADD_ARMOUR_TO_PED', note: 'Renamed' },
-    '_GET_NUMBER_OF_INSTANCES_OF_SCRIPT_WITH_NAME_HASH': { replacement: 'NETWORK_GET_NUM_SCRIPT_PARTICIPANTS', note: 'Network script' },
-    '_START_SCRIPT_WITH_NAME_HASH': { replacement: 'SCRIPT_HASH_ADD', note: 'Start script' },
-    '_NETWORK_SHOP_BASKET_ADD_ITEM': { replacement: 'NET_GAMESERVER_BASKET_ADD_ITEM', note: 'Shop' },
-    '_NETWORK_SHOP_BEGIN_SERVICE': { replacement: 'NET_GAMESERVER_BEGIN_SERVICE', note: 'Shop' },
-    '_NETWORK_SHOP_CHECKOUT_START': { replacement: 'NET_GAMESERVER_CHECKOUT_START', note: 'Shop' },
-    '_NETWORK_SHOP_GET_PRICE': { replacement: 'NET_GAMESERVER_GET_PRICE', note: 'Shop' },
-    '_0x21C235BC64831E5A': { replacement: 'NET_GAMESERVER_TRANSFER_BANK_TO_WALLET', note: 'Money transfer' },
-    '_0xE23D5873C2394C61': { replacement: 'NET_GAMESERVER_TRANSFER_WALLET_TO_BANK', note: 'Money transfer' }
-};
-
-// =============================================================================
-// MAIN CONVERSION FUNCTION
-// =============================================================================
-
-function convertCode() {
-    const input = document.getElementById('input').value;
-    const options = {
-        imgui: document.getElementById('opt-imgui').checked,
-        helpers: document.getElementById('opt-helpers').checked,
-        natives: document.getElementById('opt-natives').checked,
-        comments: document.getElementById('opt-comments').checked,
-        pluto: document.getElementById('opt-pluto').checked,
-        optimize: document.getElementById('opt-optimize').checked
-    };
-    
-    // Reset stats
-    CONVERTER.stats = { lines: 0, conversions: 0, plutoFixes: 0, nativeUpdates: 0, warnings: 0, errors: 0 };
-    CONVERTER.logs = [];
-    CONVERTER.menuCounter = 0;
-    CONVERTER.featureCounter = 0;
-    
-    let output = input;
-    CONVERTER.stats.lines = input.split('\n').length;
-    
-    log('info', `Starting conversion of ${CONVERTER.stats.lines} lines...`);
-    
-    // Step 1: Convert Pluto Lua syntax
-    if (options.pluto) {
-        output = convertPlutoSyntax(output);
-    }
-    
-    // Step 2: Convert Stand API calls
-    output = convertStandAPI(output);
-    
-    // Step 3: Update natives
-    if (options.natives) {
-        output = updateNatives(output);
-    }
-    
-    // Step 4: Add helper functions if needed
-    if (options.helpers) {
-        output = addHelperFunctions(output);
-    }
-    
-    // Step 5: Add ImGui ClickGUI framework if enabled
-    if (options.imgui) {
-        output = addImGuiFramework(output);
-    }
-    
-    // Step 6: Add header
-    output = addHeader(output, options);
-    
-    // Step 7: Optimize if enabled
-    if (options.optimize) {
-        output = optimizeCode(output);
-    }
-    
-    // Step 8: Final cleanup
-    output = finalCleanup(output);
-    
-    document.getElementById('output').value = output;
-    updateStats();
-    
-    log('success', `Conversion complete! ${CONVERTER.stats.conversions} API conversions, ${CONVERTER.stats.plutoFixes} Pluto fixes, ${CONVERTER.stats.nativeUpdates} native updates.`);
-}
-
-function convertPlutoSyntax(code) {
-    let result = code;
-    
-    for (const conv of PLUTO_CONVERSIONS) {
-        const matches = result.match(conv.pattern);
-        if (matches) {
-            CONVERTER.stats.plutoFixes += matches.length;
-            log('info', `Converting ${matches.length}x ${conv.name}`);
+        async function previousWeek() {
+            if (currentWeek > 1) {
+                currentWeek--;
+                await saveData();
+                render();
+            }
         }
-        
-        if (typeof conv.replace === 'function') {
-            result = result.replace(conv.pattern, conv.replace);
-        } else {
-            result = result.replace(conv.pattern, conv.replace);
-        }
-    }
-    
-    // Handle continue statements with proper label placement
-    result = handleContinueStatements(result);
-    
-    return result;
-}
 
-function handleContinueStatements(code) {
-    // Add ::continue_label:: before end of loops that have goto continue_label
-    const lines = code.split('\n');
-    const result = [];
-    let loopStack = [];
-    
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const trimmed = line.trim();
-        
-        // Track loop starts
-        if (/^(for|while|repeat)\b/.test(trimmed)) {
-            loopStack.push(i);
+        async function nextWeek() {
+            if (currentWeek < 52) {
+                currentWeek++;
+                await saveData();
+                render();
+            }
         }
-        
-        // Track loop ends
-        if (trimmed === 'end' && loopStack.length > 0) {
-            // Check if this loop contains continue
-            let containsContinue = false;
-            const loopStart = loopStack.pop();
-            for (let j = loopStart; j < i; j++) {
-                if (lines[j].includes('goto continue_label')) {
-                    containsContinue = true;
-                    break;
+
+        async function resetWeek() {
+            if (!confirm('Reset this week? All progress will be lost.')) return;
+            
+            const data = getCurrentWeekData();
+            DAYS.forEach(day => {
+                data[day].forEach(task => task.completed = false);
+            });
+            
+            await saveData();
+            render();
+        }
+
+        async function resetAll() {
+            if (!confirm('⚠️ WARNING: This will delete EVERYTHING. Are you sure?')) return;
+            if (!confirm('Really? All weeks, all progress, all custom tasks?')) return;
+            
+            weekData = initializeWeekData();
+            currentWeek = 1;
+            await saveData();
+            render();
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('taskModal');
+            if (modal.classList.contains('active')) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                } else if (e.key === 'Enter') {
+                    saveTask();
                 }
             }
-            if (containsContinue) {
-                result.push('    ::continue_label::');
-            }
-        }
-        
-        result.push(line);
-    }
-    
-    return result.join('\n');
-}
+        });
 
-function convertStandAPI(code) {
-    let result = code;
-    
-    // Process each API category
-    for (const [category, mappings] of Object.entries(API_MAPPINGS)) {
-        for (const [func, config] of Object.entries(mappings)) {
-            if (config.pattern) {
-                const matches = result.match(config.pattern);
-                if (matches) {
-                    CONVERTER.stats.conversions += matches.length;
-                    log('info', `Converting ${matches.length}x ${func}`);
-                    
-                    if (config.handler && HANDLERS[config.handler]) {
-                        result = result.replace(config.pattern, (...args) => {
-                            return HANDLERS[config.handler](...args);
-                        });
-                    } else if (config.replacement) {
-                        result = result.replace(config.pattern, config.replacement);
-                    }
-                }
-            } else if (config.replacement) {
-                // Simple string replacement
-                const regex = new RegExp(escapeRegex(func), 'g');
-                const matches = result.match(regex);
-                if (matches) {
-                    CONVERTER.stats.conversions += matches.length;
-                    log('info', `Converting ${matches.length}x ${func}`);
-                    result = result.replace(regex, config.replacement);
-                }
-            }
-        }
-    }
-    
-    // Additional standalone conversions
-    const additionalConversions = [
-        // Stand global variables
-        { from: /\bSCRIPT_NAME\b/g, to: '"ConvertedScript"' },
-        { from: /\bSCRIPT_FILENAME\b/g, to: '"converted_script.lua"' },
-        { from: /\bSCRIPT_RELPATH\b/g, to: '"scripts/converted_script.lua"' },
-        
-        // Stand constants
-        { from: /\bTOAST_DEFAULT\b/g, to: 'LogLevel.Info' },
-        { from: /\bTOAST_ALL\b/g, to: 'LogLevel.Info' },
-        { from: /\bTOAST_ABOVE_MAP\b/g, to: 'LogLevel.Info' },
-        { from: /\bINVALID_GUID\b/g, to: '0' },
-        
-        // Click types
-        { from: /\bCLICK_MENU\b/g, to: '1' },
-        { from: /\bCLICK_COMMAND\b/g, to: '2' },
-        { from: /\bCLICK_SCRIPTED\b/g, to: '3' },
-        
-        // Command perms
-        { from: /\bCOMMANDPERM_FRIENDLY\b/g, to: '1' },
-        { from: /\bCOMMANDPERM_USERONLY\b/g, to: '7' },
-        
-        // Alignment
-        { from: /\bALIGN_TOP_LEFT\b/g, to: '0' },
-        { from: /\bALIGN_CENTRE\b/g, to: '4' },
-        { from: /\bALIGN_BOTTOM_RIGHT\b/g, to: '8' }
-    ];
-    
-    for (const conv of additionalConversions) {
-        const matches = result.match(conv.from);
-        if (matches) {
-            CONVERTER.stats.conversions += matches.length;
-            result = result.replace(conv.from, conv.to);
-        }
-    }
-    
-    return result;
-}
-
-function updateNatives(code) {
-    let result = code;
-    
-    for (const [oldNative, config] of Object.entries(NATIVE_UPDATES)) {
-        const regex = new RegExp(`\\b${escapeRegex(oldNative)}\\b`, 'g');
-        const matches = result.match(regex);
-        if (matches) {
-            CONVERTER.stats.nativeUpdates += matches.length;
-            log('info', `Updating native: ${oldNative} → ${config.replacement}`);
-            result = result.replace(regex, config.replacement);
-        }
-    }
-    
-    return result;
-}
-
-function addHelperFunctions(code) {
-    const helpers = `
--- ============================================================================
--- HELPER FUNCTIONS (Auto-generated by Stand to Cherax Converter)
--- ============================================================================
-
--- Vector3 helper
-local function vector3(x, y, z)
-    return { x = x or 0, y = y or 0, z = z or 0 }
-end
-
--- Request model with timeout
-local function RequestModel(model)
-    local hash = type(model) == "string" and joaat(model) or model
-    if not STREAMING.IS_MODEL_VALID(hash) then return false end
-    STREAMING.REQUEST_MODEL(hash)
-    local timeout = 0
-    while not STREAMING.HAS_MODEL_LOADED(hash) and timeout < 100 do
-        Script.Yield(10)
-        timeout = timeout + 1
-    end
-    return STREAMING.HAS_MODEL_LOADED(hash)
-end
-
--- Get ground Z coordinate
-local function GetGroundZ(x, y)
-    local ptr = Memory.Alloc(4)
-    MISC.GET_GROUND_Z_FOR_3D_COORD(x, y, 1000.0, ptr, false, false)
-    return Memory.ReadFloat(ptr)
-end
-
--- Draw text on screen
-local function DrawText(text, x, y, scale, r, g, b, a)
-    scale = scale or 0.35
-    r, g, b, a = r or 255, g or 255, b or 255, a or 255
-    HUD.SET_TEXT_FONT(4)
-    HUD.SET_TEXT_SCALE(scale, scale)
-    HUD.SET_TEXT_COLOUR(r, g, b, a)
-    HUD.SET_TEXT_OUTLINE()
-    HUD.BEGIN_TEXT_COMMAND_DISPLAY_TEXT("STRING")
-    HUD.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(text)
-    HUD.END_TEXT_COMMAND_DISPLAY_TEXT(x, y, 0)
-end
-
--- Draw marker at position
-local function DrawMarker(type, pos, scale, r, g, b, a)
-    scale = scale or 1.0
-    r, g, b, a = r or 255, g or 0, b or 0, a or 100
-    GRAPHICS.DRAW_MARKER(type, pos.x, pos.y, pos.z, 0, 0, 0, 0, 0, 0, scale, scale, scale, r, g, b, a, false, false, 2, false, nil, nil, false)
-end
-
--- File helpers
-local function FileExists(path)
-    local f = io.open(path, "r")
-    if f then f:close() return true end
-    return false
-end
-
-local function ReadFile(path)
-    local f = io.open(path, "r")
-    if not f then return nil end
-    local content = f:read("*all")
-    f:close()
-    return content
-end
-
-local function WriteFile(path, content)
-    local f = io.open(path, "w")
-    if not f then return false end
-    f:write(content)
-    f:close()
-    return true
-end
-
--- Get look at rotation
-local function GetLookAtRotation(from, to)
-    local dx = to.x - from.x
-    local dy = to.y - from.y
-    local dz = to.z - from.z
-    local heading = math.deg(math.atan(dx, dy))
-    local dist = math.sqrt(dx*dx + dy*dy)
-    local pitch = math.deg(math.atan(dz, dist))
-    return { x = -pitch, y = 0, z = -heading }
-end
-
--- Script event trigger
-local function TriggerScriptEvent(targetBits, args)
-    -- Convert Stand format to Cherax format
-    local argsArray = {}
-    for i, v in ipairs(args) do
-        table.insert(argsArray, v)
-    end
-    -- Implementation depends on specific script event
-end
-
--- Get vehicle handling pointer
-local function GetVehicleHandlingPtr(vehicle)
-    local ptr = Memory.HandleToPtr(vehicle)
-    if ptr == 0 then return 0 end
-    return Memory.ReadI64(ptr + 0x938) -- Handling data offset
-end
-
--- Begin text command helper
-local function BeginTextCommand(text)
-    HUD.BEGIN_TEXT_COMMAND_DISPLAY_TEXT("STRING")
-    HUD.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(text)
-end
-
-`;
-    return helpers + code;
-}
-
-function addImGuiFramework(code) {
-    const framework = `
--- ============================================================================
--- IMGUI CLICKGUI FRAMEWORK (Auto-generated)
--- ============================================================================
-
-local GUI = {
-    isOpen = false,
-    windowPos = { x = 100, y = 100 },
-    windowSize = { w = 400, h = 600 },
-    features = {},
-    tabs = {},
-    activeTab = 1,
-    colors = {
-        background = { 15, 15, 20, 240 },
-        header = { 99, 102, 241, 255 },
-        button = { 40, 40, 50, 255 },
-        buttonHover = { 60, 60, 70, 255 },
-        text = { 240, 240, 240, 255 },
-        accent = { 99, 102, 241, 255 },
-        toggle_on = { 34, 197, 94, 255 },
-        toggle_off = { 100, 100, 100, 255 }
-    }
-}
-
-function GUI.AddTab(name)
-    table.insert(GUI.tabs, { name = name, features = {} })
-    return #GUI.tabs
-end
-
-function GUI.AddFeature(tabIdx, featType, name, description, callback, options)
-    options = options or {}
-    local feature = {
-        type = featType,
-        name = name,
-        description = description or "",
-        callback = callback,
-        enabled = options.default or false,
-        value = options.value or 0,
-        min = options.min or 0,
-        max = options.max or 100,
-        items = options.items or {},
-        selectedIdx = options.selectedIdx or 1
-    }
-    table.insert(GUI.tabs[tabIdx].features, feature)
-    return feature
-end
-
-function GUI.Toggle()
-    GUI.isOpen = not GUI.isOpen
-end
-
-function GUI.Render()
-    if not GUI.isOpen then return end
-    
-    local x, y = GUI.windowPos.x, GUI.windowPos.y
-    local w, h = GUI.windowSize.w, GUI.windowSize.h
-    local c = GUI.colors
-    
-    -- Background
-    ImGui.AddRectFilled(x, y, x + w, y + h, c.background[1], c.background[2], c.background[3], c.background[4], 8)
-    
-    -- Header
-    ImGui.AddRectFilled(x, y, x + w, y + 40, c.header[1], c.header[2], c.header[3], c.header[4], 8)
-    ImGui.AddText(x + 15, y + 10, "Converted Script", c.text[1], c.text[2], c.text[3], c.text[4])
-    
-    -- Tab bar
-    local tabY = y + 50
-    local tabW = w / #GUI.tabs
-    for i, tab in ipairs(GUI.tabs) do
-        local tabX = x + (i - 1) * tabW
-        local tabColor = i == GUI.activeTab and c.accent or c.button
-        ImGui.AddRectFilled(tabX + 2, tabY, tabX + tabW - 2, tabY + 30, tabColor[1], tabColor[2], tabColor[3], tabColor[4], 4)
-        ImGui.AddText(tabX + 10, tabY + 5, tab.name, c.text[1], c.text[2], c.text[3], c.text[4])
-    end
-    
-    -- Features
-    local featY = tabY + 40
-    local currentTab = GUI.tabs[GUI.activeTab]
-    if currentTab then
-        for i, feat in ipairs(currentTab.features) do
-            GUI.RenderFeature(feat, x + 10, featY, w - 20)
-            featY = featY + 40
-        end
-    end
-end
-
-function GUI.RenderFeature(feat, x, y, width)
-    local c = GUI.colors
-    
-    -- Feature background
-    ImGui.AddRectFilled(x, y, x + width, y + 35, c.button[1], c.button[2], c.button[3], c.button[4], 4)
-    
-    -- Feature name
-    ImGui.AddText(x + 10, y + 8, feat.name, c.text[1], c.text[2], c.text[3], c.text[4])
-    
-    if feat.type == "toggle" then
-        local toggleColor = feat.enabled and c.toggle_on or c.toggle_off
-        ImGui.AddCircleFilled(x + width - 20, y + 17, 8, toggleColor[1], toggleColor[2], toggleColor[3], toggleColor[4])
-    elseif feat.type == "slider" then
-        local sliderW = 100
-        local sliderX = x + width - sliderW - 10
-        local fillW = ((feat.value - feat.min) / (feat.max - feat.min)) * sliderW
-        ImGui.AddRectFilled(sliderX, y + 12, sliderX + sliderW, y + 22, 50, 50, 60, 255, 4)
-        ImGui.AddRectFilled(sliderX, y + 12, sliderX + fillW, y + 22, c.accent[1], c.accent[2], c.accent[3], c.accent[4], 4)
-        ImGui.AddText(sliderX + sliderW + 5, y + 8, tostring(feat.value), c.text[1], c.text[2], c.text[3], c.text[4])
-    elseif feat.type == "button" then
-        ImGui.AddText(x + width - 50, y + 8, "[CLICK]", c.accent[1], c.accent[2], c.accent[3], c.accent[4])
-    end
-end
-
--- Register GUI render loop
-Script.RegisterLooped(function()
-    GUI.Render()
-    Script.Yield()
-end)
-
--- Toggle key (INSERT by default)
-Script.RegisterLooped(function()
-    if PAD.IS_DISABLED_CONTROL_JUST_PRESSED(0, 121) then -- INSERT key
-        GUI.Toggle()
-    end
-    Script.Yield(50)
-end)
-
-`;
-    return framework + code;
-}
-
-function addHeader(code, options) {
-    const timestamp = new Date().toISOString();
-    const header = `--[[
-================================================================================
-  CONVERTED SCRIPT - Stand Pluto Lua → Cherax Lua
-================================================================================
-  Conversion Date: ${timestamp}
-  Converter: Stand to Cherax Converter Pro
-  
-  Options Used:
-    - ImGui ClickGUI: ${options.imgui ? 'Yes' : 'No'}
-    - Helper Functions: ${options.helpers ? 'Yes' : 'No'}
-    - Native Updates: ${options.natives ? 'Yes' : 'No'}
-    - Pluto Conversion: ${options.pluto ? 'Yes' : 'No'}
-    - Code Optimization: ${options.optimize ? 'Yes' : 'No'}
-  
-  Statistics:
-    - Lines Processed: ${CONVERTER.stats.lines}
-    - API Conversions: ${CONVERTER.stats.conversions}
-    - Pluto Fixes: ${CONVERTER.stats.plutoFixes}
-    - Native Updates: ${CONVERTER.stats.nativeUpdates}
-  
-  IMPORTANT: This is an auto-converted script. Please test thoroughly!
-================================================================================
---]]
-
-`;
-    return header + code;
-}
-
-function optimizeCode(code) {
-    let result = code;
-    
-    // Remove excessive blank lines
-    result = result.replace(/\n{4,}/g, '\n\n\n');
-    
-    // Remove trailing whitespace
-    result = result.replace(/[ \t]+$/gm, '');
-    
-    // Optimize common patterns
-    result = result.replace(/if\s+true\s+then/g, 'do');
-    result = result.replace(/if\s+false\s+then[\s\S]*?end/g, '-- Removed dead code');
-    
-    return result;
-}
-
-function finalCleanup(code) {
-    let result = code;
-    
-    // Fix double semicolons
-    result = result.replace(/;;+/g, ';');
-    
-    // Fix empty function bodies
-    result = result.replace(/function\s*\([^)]*\)\s*end/g, 'function() end');
-    
-    // Remove duplicate comments
-    result = result.replace(/(-- [^\n]+)\n\1/g, '$1');
-    
-    // Ensure proper line endings
-    result = result.replace(/\r\n/g, '\n');
-    
-    return result;
-}
-
-// =============================================================================
-// UTILITY FUNCTIONS
-// =============================================================================
-
-function escapeRegex(string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function log(type, message) {
-    CONVERTER.logs.push({ type, message, time: new Date().toLocaleTimeString() });
-    
-    const logEl = document.getElementById('log');
-    const entry = document.createElement('div');
-    entry.className = 'log-entry';
-    entry.innerHTML = `
-        <span class="log-type ${type}">[${type.toUpperCase()}]</span>
-        <span class="log-message">${message}</span>
-    `;
-    logEl.appendChild(entry);
-    logEl.scrollTop = logEl.scrollHeight;
-    
-    if (type === 'warning') CONVERTER.stats.warnings++;
-    if (type === 'error') CONVERTER.stats.errors++;
-}
-
-function clearLog() {
-    document.getElementById('log').innerHTML = '';
-    CONVERTER.logs = [];
-}
-
-function updateStats() {
-    document.getElementById('stat-lines').textContent = CONVERTER.stats.lines;
-    document.getElementById('stat-conversions').textContent = CONVERTER.stats.conversions;
-    document.getElementById('stat-pluto').textContent = CONVERTER.stats.plutoFixes;
-    document.getElementById('stat-natives').textContent = CONVERTER.stats.nativeUpdates;
-    document.getElementById('stat-warnings').textContent = CONVERTER.stats.warnings;
-    document.getElementById('stat-errors').textContent = CONVERTER.stats.errors;
-}
-
-function clearAll() {
-    document.getElementById('input').value = '';
-    document.getElementById('output').value = '';
-    clearLog();
-    CONVERTER.stats = { lines: 0, conversions: 0, plutoFixes: 0, nativeUpdates: 0, warnings: 0, errors: 0 };
-    updateStats();
-}
-
-function copyOutput() {
-    const output = document.getElementById('output');
-    output.select();
-    document.execCommand('copy');
-    log('success', 'Output copied to clipboard!');
-}
-
-function downloadOutput() {
-    const output = document.getElementById('output').value;
-    if (!output) {
-        log('warning', 'No output to download!');
-        return;
-    }
-    
-    const blob = new Blob([output], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'converted_script.lua';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    log('success', 'Script downloaded as converted_script.lua');
-}
-
-function loadSample() {
-    const sample = `-- Sample Stand Pluto Lua Script
-util.require_natives('3095a')
-
-local myRoot = menu.my_root()
-
--- Variables with Pluto syntax
-local counter = 0
-local isActive = false
-
--- Using Pluto compound assignment
-counter += 1
-
--- Pluto string interpolation
-local message = $"Counter value is " .. counter
-
--- Pluto null coalescing
-local name = playerName ?? "Unknown"
-
--- Pluto ternary
-local status = isActive ? "Active" : "Inactive"
-
--- Lambda function
-local square = |x| -> x * x
-
--- For-as loop (Pluto)
-for players.list() as pid do
-    local playerName = players.get_name(pid)
-    util.toast("Player: " .. playerName)
-end
-
--- Menu creation
-local settingsTab = myRoot:list("Settings", {}, "Configure options")
-
-settingsTab:toggle_loop("Auto Heal", {"autoheal"}, "Heals player automatically", function()
-    local ped = players.user_ped()
-    local health = ENTITY.GET_ENTITY_HEALTH(ped)
-    local maxHealth = ENTITY.GET_ENTITY_MAX_HEALTH(ped)
-    
-    if health < maxHealth then
-        ENTITY.SET_ENTITY_HEALTH(ped, maxHealth, 0)
-    end
-    
-    util.yield(100)
-end)
-
-settingsTab:slider("Speed Multiplier", {"speed"}, "Set movement speed", 1, 10, 1, 1, function(value)
-    local ped = players.user_ped()
-    PED.SET_PED_MOVE_RATE_OVERRIDE(ped, value)
-end)
-
-settingsTab:action("Teleport to Waypoint", {"tpwp"}, "Teleport to map waypoint", function()
-    local waypoint = HUD.GET_FIRST_BLIP_INFO_ID(8)
-    if HUD.DOES_BLIP_EXIST(waypoint) then
-        local coords = HUD.GET_BLIP_COORDS(waypoint)
-        local ped = players.user_ped()
-        ENTITY.SET_ENTITY_COORDS(ped, coords.x, coords.y, coords.z, true, false, false, false)
-        util.toast("Teleported to waypoint!")
-    end
-end)
-
--- Player list iteration
-for entities.get_all_vehicles_as_handles() as veh do
-    local model = ENTITY.GET_ENTITY_MODEL(veh)
-    local pos = entities.get_position(veh)
-end
-
--- DirectX drawing
-util.create_tick_handler(function()
-    directx.draw_text(0.5, 0.1, "Hello World", ALIGN_CENTRE, 1.0, {r=1, g=1, b=1, a=1})
-end)
-
--- Memory operations
-local globalPtr = memory.script_global(1574918)
-local value = memory.read_int(globalPtr)
-
-util.toast("Script loaded!", TOAST_DEFAULT)
-util.keep_running()`;
-
-    document.getElementById('input').value = sample;
-    log('info', 'Sample script loaded!');
-}
-
-// =============================================================================
-// MAPPING REFERENCE UI
-// =============================================================================
-
-const MAPPING_DATA = {
-    menu: [
-        ['menu.my_root()', 'Cherax.GetTab()', 'Gets main tab'],
-        ['menu.list()', 'Tab:AddSubTab()', 'Creates submenu'],
-        ['menu.action()', 'FeatureMgr.AddFeature() + Button', 'Creates button'],
-        ['menu.toggle()', 'FeatureMgr.AddFeature() + Toggle', 'Creates toggle'],
-        ['menu.toggle_loop()', 'Script.RegisterLooped() + Toggle', 'Creates looped toggle'],
-        ['menu.slider()', 'FeatureMgr.AddFeature() + IntSlider', 'Creates slider'],
-        ['menu.text_input()', 'FeatureMgr.AddFeature() + InputText', 'Creates text input'],
-        ['menu.divider()', 'Tab:AddSeparator()', 'Creates separator'],
-        ['menu.get_value()', 'Feature:GetValueAsInt()', 'Gets feature value'],
-        ['menu.set_value()', 'Feature:SetIntValue()', 'Sets feature value']
-    ],
-    players: [
-        ['players.user()', 'GTA.GetLocalPlayerId()', 'Local player ID'],
-        ['players.user_ped()', 'GTA.GetLocalPed().Handle', 'Local ped handle'],
-        ['players.get_name()', 'Players.GetById():GetName()', 'Player name'],
-        ['players.get_rockstar_id()', 'Players.GetById():GetRockstarId()', 'Rockstar ID'],
-        ['players.get_position()', 'Players.GetCPed().Position', 'Player position'],
-        ['players.get_host()', 'Players.GetHost():GetId()', 'Session host'],
-        ['players.list()', 'Loop Players.GetById(0-31)', 'All players'],
-        ['players.is_godmode()', 'Players.GetById():IsGodmode()', 'Godmode check'],
-        ['players.get_ip()', 'Players.GetById():GetExternalAddress().IPv4', 'IP address']
-    ],
-    entities: [
-        ['entities.create_ped()', 'GTA.CreatePed()', 'Creates ped'],
-        ['entities.create_vehicle()', 'GTA.SpawnVehicle()', 'Creates vehicle'],
-        ['entities.create_object()', 'GTA.CreateObject()', 'Creates object'],
-        ['entities.delete()', 'ENTITY.DELETE_ENTITY()', 'Deletes entity'],
-        ['entities.get_all_vehicles_as_handles()', 'PoolMgr loop', 'All vehicles'],
-        ['entities.get_all_peds_as_handles()', 'PoolMgr loop', 'All peds'],
-        ['entities.request_control()', 'NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY()', 'Request control'],
-        ['entities.handle_to_pointer()', 'Memory.HandleToPtr()', 'Handle to pointer']
-    ],
-    util: [
-        ['util.yield()', 'Script.Yield()', 'Script yield'],
-        ['util.toast()', 'Logger.Log()', 'Show notification'],
-        ['util.joaat()', 'joaat()', 'Jenkins hash'],
-        ['util.create_tick_handler()', 'Script.RegisterLooped()', 'Tick handler'],
-        ['util.create_thread()', 'Script.QueueJob()', 'New thread'],
-        ['util.require_natives()', 'Not needed', 'Natives built-in'],
-        ['util.current_time_millis()', 'Time.GetEpocheMs()', 'Current time'],
-        ['util.is_session_started()', 'NETWORK.NETWORK_IS_SESSION_STARTED()', 'Session check']
-    ],
-    memory: [
-        ['memory.script_global()', 'ScriptGlobal.GetPtr()', 'Global pointer'],
-        ['memory.script_local()', 'ScriptLocal.GetPtr()', 'Local pointer'],
-        ['memory.read_int()', 'Memory.ReadI32()', 'Read int32'],
-        ['memory.read_float()', 'Memory.ReadFloat()', 'Read float'],
-        ['memory.write_int()', 'Memory.WriteI32()', 'Write int32'],
-        ['memory.write_float()', 'Memory.WriteFloat()', 'Write float'],
-        ['memory.alloc()', 'Memory.Alloc()', 'Allocate memory'],
-        ['memory.scan()', 'Memory.Scan()', 'Pattern scan']
-    ],
-    pluto: [
-        ['+=, -=, *=, /=', 'a = a + b', 'Compound assignment'],
-        ['??', '(a ~= nil and a or b)', 'Null coalescing'],
-        ['? :', '(cond and a or b)', 'Ternary operator'],
-        ['continue', 'goto + ::label::', 'Continue statement'],
-        ['|x| -> expr', 'function(x) return expr end', 'Lambda'],
-        ['$"text {var}"', '"text " .. var', 'String interpolation'],
-        ['for arr as v', 'for _, v in pairs(arr)', 'For-as loop'],
-        ['a?.b', '(a and a.b)', 'Safe navigation'],
-        ['++, --', 'a = a + 1', 'Increment/decrement'],
-        ['|, &, <<, >>', 'bit.bor, bit.band, etc.', 'Bitwise operators']
-    ]
-};
-
-function showTab(tabName, element) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    element.classList.add('active');
-    
-    const data = MAPPING_DATA[tabName];
-    let html = `<table class="mapping-table">
-        <tr><th>Stand / Pluto</th><th>Cherax / Standard Lua</th><th>Description</th></tr>`;
-    
-    for (const [from, to, desc] of data) {
-        html += `<tr><td>${from}</td><td>${to}</td><td>${desc}</td></tr>`;
-    }
-    
-    html += '</table>';
-    document.getElementById('mapping-content').innerHTML = html;
-}
-
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    showTab('menu', document.querySelector('.tab.active'));
-    log('info', 'Converter initialized and ready!');
-});
+        // Initialize
+        (async () => {
+            await loadData();
+            render();
+        })();
     </script>
 </body>
 </html>
