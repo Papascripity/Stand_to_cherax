@@ -3,147 +3,368 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lock In Tracker</title>
+    <title>Lock In - Daily Tracker</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-start: #0f0c29;
+            --bg-mid: #302b63;
+            --bg-end: #24243e;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-pink: #ff6b9d;
+            --accent-purple: #c44569;
+            --accent-blue: #4e54c8;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --success: #00d4aa;
+            --warning: #ffa502;
+            --danger: #ff4757;
+        }
+
         body {
-            font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #eee;
-            padding: 20px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
             min-height: 100vh;
+            color: var(--text-primary);
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 107, 157, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(78, 84, 200, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(196, 69, 105, 0.1) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 
+                0 8px 32px 0 rgba(0, 0, 0, 0.37),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            border: 2px solid #e94560;
+            margin-bottom: 40px;
+            padding: 40px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .header h1 {
-            font-size: 2.5em;
-            color: #e94560;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 10px;
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+            animation: gradientShift 3s ease infinite;
+            background-size: 200% 200%;
         }
 
-        .header .subtitle {
-            color: #aaa;
-            font-size: 1.1em;
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        .auto-save-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            border: 1px solid var(--glass-border);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .auto-save-indicator.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .save-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
         }
 
         .week-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
+            padding: 24px 32px;
+            margin-bottom: 30px;
+            animation: slideDown 0.6s ease-out 0.1s both;
         }
 
         .week-nav h2 {
-            color: #fff;
-            font-size: 1.5em;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.7));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .week-nav button {
-            background: #e94560;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+        .nav-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 16px;
             cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
         }
 
-        .week-nav button:hover {
-            background: #ff6b81;
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .nav-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .nav-btn:hover {
             transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-btn:active {
+            transform: translateY(0);
         }
 
         .score-board {
+            padding: 40px;
+            margin-bottom: 40px;
             text-align: center;
-            padding: 20px;
-            background: rgba(233, 69, 96, 0.1);
-            border: 2px solid #e94560;
-            border-radius: 10px;
-            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            animation: slideDown 0.6s ease-out 0.2s both;
         }
 
-        .score-board .score {
-            font-size: 3em;
-            color: #e94560;
-            font-weight: bold;
+        .score-board::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 107, 157, 0.1), 
+                rgba(196, 69, 105, 0.1), 
+                rgba(78, 84, 200, 0.1));
+            opacity: 0.5;
+            z-index: -1;
         }
 
-        .score-board .message {
-            font-size: 1.2em;
-            margin-top: 10px;
-            color: #fff;
+        .score {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 20px;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .score-message {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+            margin-top: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple), var(--accent-blue));
+            background-size: 200% 100%;
+            border-radius: 100px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 0%; }
+            50% { background-position: 100% 0%; }
         }
 
         .days-grid {
             display: grid;
-            gap: 20px;
+            gap: 24px;
+            animation: fadeIn 0.6s ease-out 0.3s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .day-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            padding: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s;
+            padding: 28px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .day-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            padding: 1px;
+            background: linear-gradient(135deg, 
+                rgba(255, 107, 157, 0.3), 
+                rgba(196, 69, 105, 0.3), 
+                rgba(78, 84, 200, 0.3));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
         }
 
         .day-card:hover {
-            border-color: #e94560;
-            transform: translateY(-5px);
+            transform: translateY(-4px) scale(1.01);
+        }
+
+        .day-card:hover::before {
+            opacity: 1;
         }
 
         .day-card.rest-day {
-            background: rgba(100, 255, 100, 0.05);
-            border-color: rgba(100, 255, 100, 0.3);
+            background: linear-gradient(135deg, 
+                rgba(0, 212, 170, 0.05), 
+                rgba(0, 212, 170, 0.02));
         }
 
         .day-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .day-name {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #e94560;
-            text-transform: uppercase;
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.01em;
         }
 
         .day-score {
-            font-size: 1.2em;
-            color: #fff;
-            background: rgba(233, 69, 96, 0.2);
-            padding: 5px 15px;
-            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            background: rgba(255, 107, 157, 0.15);
+            padding: 8px 20px;
+            border-radius: 100px;
+            border: 1px solid rgba(255, 107, 157, 0.3);
         }
 
         .tasks-list {
@@ -153,70 +374,116 @@
         .task-item {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 12px;
-            margin-bottom: 10px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
-            transition: all 0.3s;
+            gap: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
         }
 
         .task-item:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(4px);
         }
 
         .task-item.completed {
-            background: rgba(100, 255, 100, 0.1);
+            background: linear-gradient(135deg, 
+                rgba(0, 212, 170, 0.1), 
+                rgba(0, 212, 170, 0.05));
+            border-color: rgba(0, 212, 170, 0.3);
         }
 
         .task-checkbox {
             width: 24px;
             height: 24px;
             cursor: pointer;
-            accent-color: #e94560;
+            appearance: none;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            position: relative;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .task-checkbox:checked {
+            background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+            border-color: var(--accent-pink);
+        }
+
+        .task-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            animation: checkPop 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes checkPop {
+            to { transform: translate(-50%, -50%) scale(1); }
         }
 
         .task-label {
             flex: 1;
-            font-size: 1.1em;
-            cursor: pointer;
-            color: #ddd;
+            font-size: 1.05rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
 
         .task-item.completed .task-label {
             text-decoration: line-through;
-            color: #888;
+            opacity: 0.5;
         }
 
         .task-edit {
             background: none;
             border: none;
-            color: #e94560;
+            color: var(--accent-pink);
             cursor: pointer;
-            font-size: 1em;
-            padding: 5px 10px;
+            font-size: 1.2rem;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            flex-shrink: 0;
+        }
+
+        .task-item:hover .task-edit {
+            opacity: 1;
         }
 
         .task-edit:hover {
-            color: #ff6b81;
+            background: rgba(255, 107, 157, 0.2);
+            transform: scale(1.1);
         }
 
         .add-task-btn {
             width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            background: rgba(233, 69, 96, 0.2);
-            border: 2px dashed #e94560;
-            color: #e94560;
-            border-radius: 5px;
+            padding: 16px;
+            margin-top: 16px;
+            background: rgba(255, 107, 157, 0.1);
+            border: 2px dashed rgba(255, 107, 157, 0.3);
+            color: var(--accent-pink);
+            border-radius: 16px;
             cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-size: 1em;
-            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .add-task-btn:hover {
-            background: rgba(233, 69, 96, 0.3);
+            background: rgba(255, 107, 157, 0.2);
+            border-color: rgba(255, 107, 157, 0.5);
+            transform: translateY(-2px);
         }
 
         .modal {
@@ -226,10 +493,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 2000;
+            animation: fadeIn 0.2s ease;
         }
 
         .modal.active {
@@ -237,131 +506,201 @@
         }
 
         .modal-content {
-            background: #1a1a2e;
-            padding: 30px;
-            border-radius: 10px;
-            border: 2px solid #e94560;
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px) saturate(180%);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
             max-width: 500px;
             width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .modal-content h3 {
-            color: #e94560;
-            margin-bottom: 20px;
-            font-size: 1.5em;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 24px;
         }
 
         .modal-content input {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
             color: white;
-            font-family: 'Courier New', monospace;
-            font-size: 1em;
+            font-family: 'Inter', sans-serif;
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
         }
 
         .modal-content input:focus {
             outline: none;
-            border-color: #e94560;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-pink);
+            box-shadow: 0 0 0 4px rgba(255, 107, 157, 0.1);
+        }
+
+        .modal-content input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
         }
 
         .modal-buttons {
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
 
         .modal-buttons button {
             flex: 1;
-            padding: 12px;
+            padding: 16px;
             border: none;
-            border-radius: 5px;
+            border-radius: 16px;
             cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-buttons button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .modal-buttons button:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .btn-save {
-            background: #e94560;
+            background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
             color: white;
         }
 
         .btn-save:hover {
-            background: #ff6b81;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 107, 157, 0.4);
         }
 
         .btn-cancel {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .btn-cancel:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .btn-delete {
-            background: #ff4444;
+            background: linear-gradient(135deg, var(--danger), #ee5a6f);
             color: white;
         }
 
         .btn-delete:hover {
-            background: #ff6666;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 71, 87, 0.4);
         }
 
         .controls {
             display: flex;
-            gap: 10px;
+            gap: 16px;
             justify-content: center;
-            margin-top: 30px;
+            margin-top: 40px;
+            animation: fadeIn 0.6s ease-out 0.4s both;
         }
 
         .controls button {
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 14px 28px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
-            border-radius: 5px;
+            border-radius: 16px;
             cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
         }
 
         .controls button:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: #e94560;
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
         }
 
         @media (max-width: 768px) {
             .header h1 {
-                font-size: 1.8em;
+                font-size: 2.5rem;
             }
             
-            .score-board .score {
-                font-size: 2em;
+            .score {
+                font-size: 3.5rem;
+            }
+
+            .week-nav {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .modal-buttons {
+                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
+    <div class="auto-save-indicator" id="autoSave">
+        <div class="save-dot"></div>
+        <span>Auto-saved</span>
+    </div>
+
     <div class="container">
-        <div class="header">
-            <h1>⚡ LOCK IN OR WASTE IT ⚡</h1>
+        <div class="header glass">
+            <h1>LOCK IN</h1>
             <p class="subtitle">"I'm a living thing. I'll die eventually, I'll never be born again."</p>
         </div>
 
-        <div class="week-nav">
-            <button onclick="previousWeek()">← Previous Week</button>
+        <div class="week-nav glass">
+            <button class="nav-btn" onclick="previousWeek()">← Previous</button>
             <h2 id="weekTitle">WEEK 1</h2>
-            <button onclick="nextWeek()">Next Week →</button>
+            <button class="nav-btn" onclick="nextWeek()">Next →</button>
         </div>
 
-        <div class="score-board">
+        <div class="score-board glass">
             <div class="score" id="totalScore">0/0</div>
-            <div class="message" id="scoreMessage">Let's lock in.</div>
+            <div class="score-message" id="scoreMessage">Let's lock in.</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
         </div>
 
         <div class="days-grid" id="daysGrid"></div>
@@ -400,6 +739,14 @@
         let weekData = {};
         let editingTask = null;
 
+        function showAutoSave() {
+            const indicator = document.getElementById('autoSave');
+            indicator.classList.add('show');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 2000);
+        }
+
         async function loadData() {
             try {
                 const result = await window.storage.get('weekData');
@@ -410,6 +757,7 @@
                     await saveData();
                 }
             } catch (e) {
+                console.log('Using fresh data');
                 weekData = initializeWeekData();
             }
             
@@ -427,8 +775,9 @@
             try {
                 await window.storage.set('weekData', JSON.stringify(weekData));
                 await window.storage.set('currentWeek', currentWeek.toString());
+                showAutoSave();
             } catch (e) {
-                console.error('Failed to save data:', e);
+                console.error('Failed to save:', e);
             }
         }
 
@@ -467,7 +816,7 @@
             
             DAYS.forEach(day => {
                 const dayCard = document.createElement('div');
-                dayCard.className = 'day-card';
+                dayCard.className = 'day-card glass';
                 
                 if (day === 'SUN') {
                     dayCard.classList.add('rest-day');
@@ -523,6 +872,8 @@
             document.getElementById('totalScore').textContent = `${totalCompleted}/${totalTasks}`;
             
             const percentage = totalTasks > 0 ? (totalCompleted / totalTasks) * 100 : 0;
+            document.getElementById('progressFill').style.width = `${percentage}%`;
+            
             let message = '';
             
             if (percentage === 100) {
@@ -534,9 +885,9 @@
             } else if (percentage >= 60) {
                 message = '📈 Keep pushing';
             } else if (percentage >= 40) {
-                message = '⚠️ You\'re slipping - lock in';
+                message = '⚠️ Lock in - you\'re slipping';
             } else {
-                message = '❌ Not good enough - where\'s the discipline?';
+                message = '❌ Where\'s the discipline?';
             }
             
             document.getElementById('scoreMessage').textContent = message;
@@ -578,10 +929,8 @@
             const { day, index } = editingTask;
             
             if (index === -1) {
-                // Adding new task
                 data[day].push({ name: taskName, completed: false });
             } else {
-                // Editing existing task
                 data[day][index].name = taskName;
             }
             
@@ -646,7 +995,6 @@
             render();
         }
 
-        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             const modal = document.getElementById('taskModal');
             if (modal.classList.contains('active')) {
@@ -658,7 +1006,13 @@
             }
         });
 
-        // Initialize
+        // Click outside modal to close
+        document.getElementById('taskModal').addEventListener('click', (e) => {
+            if (e.target.id === 'taskModal') {
+                closeModal();
+            }
+        });
+
         (async () => {
             await loadData();
             render();
