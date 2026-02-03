@@ -747,14 +747,14 @@
             }, 2000);
         }
 
-        async function loadData() {
+        function loadData() {
             try {
-                const result = await window.storage.get('weekData');
-                if (result && result.value) {
-                    weekData = JSON.parse(result.value);
+                const storedData = localStorage.getItem('weekData');
+                if (storedData) {
+                    weekData = JSON.parse(storedData);
                 } else {
                     weekData = initializeWeekData();
-                    await saveData();
+                    saveData();
                 }
             } catch (e) {
                 console.log('Using fresh data');
@@ -762,19 +762,19 @@
             }
             
             try {
-                const weekResult = await window.storage.get('currentWeek');
-                if (weekResult && weekResult.value) {
-                    currentWeek = parseInt(weekResult.value);
+                const storedWeek = localStorage.getItem('currentWeek');
+                if (storedWeek) {
+                    currentWeek = parseInt(storedWeek);
                 }
             } catch (e) {
                 currentWeek = 1;
             }
         }
 
-        async function saveData() {
+        function saveData() {
             try {
-                await window.storage.set('weekData', JSON.stringify(weekData));
-                await window.storage.set('currentWeek', currentWeek.toString());
+                localStorage.setItem('weekData', JSON.stringify(weekData));
+                localStorage.setItem('currentWeek', currentWeek.toString());
                 showAutoSave();
             } catch (e) {
                 console.error('Failed to save:', e);
@@ -893,10 +893,10 @@
             document.getElementById('scoreMessage').textContent = message;
         }
 
-        async function toggleTask(day, index) {
+        function toggleTask(day, index) {
             const data = getCurrentWeekData();
             data[day][index].completed = !data[day][index].completed;
-            await saveData();
+            saveData();
             render();
         }
 
@@ -919,7 +919,7 @@
             document.getElementById('taskInput').focus();
         }
 
-        async function saveTask() {
+        function saveTask() {
             if (!editingTask) return;
             
             const taskName = document.getElementById('taskInput').value.trim();
@@ -934,12 +934,12 @@
                 data[day][index].name = taskName;
             }
             
-            await saveData();
+            saveData();
             render();
             closeModal();
         }
 
-        async function deleteTask() {
+        function deleteTask() {
             if (!editingTask || editingTask.index === -1) return;
             
             const data = getCurrentWeekData();
@@ -947,7 +947,7 @@
             
             data[day].splice(index, 1);
             
-            await saveData();
+            saveData();
             render();
             closeModal();
         }
@@ -957,23 +957,23 @@
             editingTask = null;
         }
 
-        async function previousWeek() {
+        function previousWeek() {
             if (currentWeek > 1) {
                 currentWeek--;
-                await saveData();
+                saveData();
                 render();
             }
         }
 
-        async function nextWeek() {
+        function nextWeek() {
             if (currentWeek < 52) {
                 currentWeek++;
-                await saveData();
+                saveData();
                 render();
             }
         }
 
-        async function resetWeek() {
+        function resetWeek() {
             if (!confirm('Reset this week? All progress will be lost.')) return;
             
             const data = getCurrentWeekData();
@@ -981,17 +981,17 @@
                 data[day].forEach(task => task.completed = false);
             });
             
-            await saveData();
+            saveData();
             render();
         }
 
-        async function resetAll() {
+        function resetAll() {
             if (!confirm('⚠️ WARNING: This will delete EVERYTHING. Are you sure?')) return;
             if (!confirm('Really? All weeks, all progress, all custom tasks?')) return;
             
             weekData = initializeWeekData();
             currentWeek = 1;
-            await saveData();
+            saveData();
             render();
         }
 
@@ -1013,8 +1013,8 @@
             }
         });
 
-        (async () => {
-            await loadData();
+        (function() {
+            loadData();
             render();
         })();
     </script>
