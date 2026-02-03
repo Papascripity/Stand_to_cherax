@@ -706,8 +706,17 @@
         <div class="days-grid" id="daysGrid"></div>
 
         <div class="controls">
+            <button onclick="manualSave()">💾 Save Now</button>
+            <button onclick="manualLoad()">🔄 Reload Data</button>
             <button onclick="resetWeek()">Reset Week</button>
             <button onclick="resetAll()">Reset Everything</button>
+        </div>
+
+        <div class="debug-info glass" id="debugInfo" style="margin-top: 20px; padding: 20px; font-size: 0.9rem; color: rgba(255,255,255,0.6);">
+            <div style="text-align: center; margin-bottom: 10px; font-weight: 600; color: rgba(255,255,255,0.8);">
+                Debug Info (check if saving works)
+            </div>
+            <div id="debugContent">Loading...</div>
         </div>
     </div>
 
@@ -748,15 +757,19 @@
         }
 
         function loadData() {
+            console.log('🔍 Loading data from localStorage...');
             try {
                 const storedData = localStorage.getItem('weekData');
                 if (storedData) {
                     weekData = JSON.parse(storedData);
+                    console.log('✅ Found saved data!');
                 } else {
+                    console.log('⚠️ No saved data found, initializing fresh data');
                     weekData = initializeWeekData();
                     saveData();
                 }
             } catch (e) {
+                console.error('❌ Error loading data:', e);
                 console.log('Using fresh data');
                 weekData = initializeWeekData();
             }
@@ -765,20 +778,51 @@
                 const storedWeek = localStorage.getItem('currentWeek');
                 if (storedWeek) {
                     currentWeek = parseInt(storedWeek);
+                    console.log('✅ Current week:', currentWeek);
+                } else {
+                    console.log('⚠️ No saved week, starting at week 1');
                 }
             } catch (e) {
+                console.error('❌ Error loading week:', e);
                 currentWeek = 1;
             }
+            
+            // Debug: Show what's in localStorage
+            console.log('📦 localStorage contents:');
+            console.log('- weekData size:', localStorage.getItem('weekData')?.length || 0, 'characters');
+            console.log('- currentWeek:', localStorage.getItem('currentWeek'));
         }
 
         function saveData() {
             try {
+                const timestamp = new Date().toLocaleString();
                 localStorage.setItem('weekData', JSON.stringify(weekData));
                 localStorage.setItem('currentWeek', currentWeek.toString());
+                localStorage.setItem('lastSave', timestamp);
+                console.log('✅ Data saved successfully at', timestamp);
+                console.log('Week:', currentWeek);
+                console.log('Tasks:', weekData[currentWeek]);
                 showAutoSave();
+                updateDebugInfo();
+                return true;
             } catch (e) {
-                console.error('Failed to save:', e);
+                console.error('❌ Failed to save:', e);
+                alert('Failed to save data: ' + e.message);
+                return false;
             }
+        }
+
+        function manualSave() {
+            const success = saveData();
+            if (success) {
+                alert('✅ Data saved successfully!\n\nYour progress is now stored in browser memory.');
+            }
+        }
+
+        function manualLoad() {
+            loadData();
+            render();
+            alert('🔄 Data reloaded from storage!');
         }
 
         function initializeWeekData() {
@@ -806,6 +850,22 @@
                 });
             }
             return weekData[currentWeek];
+        }
+
+        function updateDebugInfo() {
+            const debugContent = document.getElementById('debugContent');
+            const weekDataSize = localStorage.getItem('weekData')?.length || 0;
+            const currentWeekStored = localStorage.getItem('currentWeek') || 'not set';
+            const lastSave = localStorage.getItem('lastSave') || 'never';
+            
+            debugContent.innerHTML = `
+                <div style="display: grid; gap: 8px;">
+                    <div>📊 Data Size: ${weekDataSize} characters ${weekDataSize > 0 ? '✅' : '❌'}</div>
+                    <div>📅 Current Week: ${currentWeekStored}</div>
+                    <div>💾 Last Save: ${lastSave}</div>
+                    <div>🌐 localStorage: ${typeof localStorage !== 'undefined' ? 'Available ✅' : 'NOT Available ❌'}</div>
+                </div>
+            `;
         }
 
         function render() {
@@ -854,6 +914,7 @@
             
             updateScore();
             document.getElementById('weekTitle').textContent = `WEEK ${currentWeek}`;
+            updateDebugInfo();
         }
 
         function updateScore() {
@@ -1014,8 +1075,22 @@
         });
 
         (function() {
+            // Test if localStorage is available
+            try {
+                const testKey = '__localStorage_test__';
+                localStorage.setItem(testKey, 'test');
+                localStorage.removeItem(testKey);
+                console.log('✅ localStorage is AVAILABLE and WORKING');
+            } catch (e) {
+                console.error('❌ localStorage is NOT WORKING:', e);
+                alert('⚠️ WARNING: localStorage is not available!\n\nYour data will NOT be saved.\n\nPossible reasons:\n- Using file:// protocol (open via HTTP server instead)\n- Browser privacy mode\n- Browser settings blocking storage\n\nError: ' + e.message);
+            }
+            
             loadData();
             render();
+            updateDebugInfo();
+            console.log('🚀 Tracker initialized!');
+            console.log('📂 Open DevTools Console (F12) to see detailed logs');
         })();
     </script>
 </body>
